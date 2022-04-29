@@ -9,7 +9,7 @@ contract AudToken is ERC20Burnable {
     uint256 public _decimals = 18;
     uint256 private _initialSupply = 1000000000 * (10 ** uint256(decimals()));
 
-    constructor() ERC20Burnable(_name, _symbol) {
+    constructor() ERC20(_name, _symbol) {
       _mint(msg.sender, _initialSupply);
     }
 }
