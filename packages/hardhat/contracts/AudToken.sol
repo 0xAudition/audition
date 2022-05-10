@@ -2,8 +2,10 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract AudToken is ERC20Burnable {
+
+contract AudToken is ERC20Burnable, Ownable {
     string public _name = "Audition Token";
     string public _symbol = "AUD";
     uint256 public _decimals = 18;
