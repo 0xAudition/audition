@@ -290,6 +290,15 @@ function App(props) {
             */}
 
           <Contract
+            name="ProjectRegistry"
+            price={price}
+            signer={userSigner}
+            provider={localProvider}
+            address={address}
+            blockExplorer={blockExplorer}
+            contractConfig={contractConfig}
+          />
+          <Contract
             name="AudToken"
             price={price}
             signer={userSigner}
