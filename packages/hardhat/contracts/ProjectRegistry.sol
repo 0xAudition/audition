@@ -18,8 +18,8 @@ contract ProjectRegistry is Ownable {
     // uint256 proposalType;
     string metaData;
     bool bountyStatus;
-    ContractInfo contracts[];
-    uint256 contractCount = 0;
+    ContractInfo[] contracts;
+    uint256 contractCount;
   }
 
   struct ContractInfo{
@@ -38,24 +38,32 @@ contract ProjectRegistry is Ownable {
     aud = _aud;
   }
 
-  function registerProject (string _projectName, string _metaData) public returns (uint256) {
-    ProjectInfo project = ProjectInfo(_projectName, msg.sender, _proposalType, _metaData, false);
-    uint256 projectlId = projectIdCounter;
-    map_id_info[proposalId] = project;
+  function registerProject (string memory _projectName, string memory _metaData) public returns (uint256) {
+    uint256 projectId = projectIdCounter;
+    map_id_info[projectId].projectName = _projectName;
+    map_id_info[projectId].submitee = msg.sender;
+    map_id_info[projectId].metaData = _metaData;
+    map_id_info[projectId].bountyStatus = false;
     projectIdCounter++;
     return projectId;
   }
 
-  function registerContract (uint256 _projectId, string _contractName, string _contractSourceUri, address _contractAddr) public returns (uint256) {
-    uint256 _contractId = getNewContractId(_projectId);
-    ContractInfo _contract = ContractInfo(_projectId, _contractId, _contractName, _contractSourceUri, _contractAddr, false);
-    map_id_info[_projectId].contracts.push(_contract);
+  function registerContract (uint256 _projectId, string memory _contractName, string memory _contractSourceUri, address _contractAddr) public returns (uint256) {
+    uint256 _contractId = map_id_info[_projectId].contractCount;
+    ContractInfo memory inputContract = ContractInfo(_projectId, _contractId, _contractName, _contractSourceUri, _contractAddr, false);
+    map_id_info[_projectId].contracts.push(inputContract);
     map_id_info[_projectId].contractCount++;
     return _contractId;
 
   }
 
-  function getNewContractId (uint256 _projectId) public returns (uint256){
-    return (map_id_info[_projectId].contractCount + 1);
+  function getContractInfo (uint256 _projectId, uint256 _contractId) public returns (ContractInfo memory) {
+    return map_id_info[_projectId].contracts[_contractId];
   }
+
+  function getContractCount (uint256 _projectId) public returns (uint256) {
+    return map_id_info[_projectId].contractCount;
+  }
+
+
 }
