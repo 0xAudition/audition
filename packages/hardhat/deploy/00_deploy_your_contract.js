@@ -50,7 +50,18 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   });
 
   const ProjectRegistry = await ethers.getContract("ProjectRegistry", deployer);
+
+  await deploy("ClaimsRegistry", {
+    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
+    from: deployer,
+    // args: [ "Hello", ethers.utils.parseEther("1.5") ],
+    args: [audAddress],
+    log: true,
+    waitConfirmations: 5,
+  });
+
   /*  await YourContract.setPurpose("Hello");
+
 
     To take ownership of yourContract using the ownable library uncomment next line and add the
     address you want to be the owner.
@@ -99,4 +110,4 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   //   console.error(error);
   // }
 };
-module.exports.tags = ["AudToken", "AudVote"];
+module.exports.tags = ["AudToken", "AudVote", "ProjectRegistry", "ClaimsRegistry"];

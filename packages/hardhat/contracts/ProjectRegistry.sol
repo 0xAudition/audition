@@ -14,7 +14,7 @@ contract ProjectRegistry is Ownable {
 
   struct ProjectInfo{
     string projectName;
-    address submitee;
+    address submitter;
     // uint256 proposalType;
     string metaData;
     bool bountyStatus;
@@ -41,7 +41,7 @@ contract ProjectRegistry is Ownable {
   function registerProject (string memory _projectName, string memory _metaData) public returns (uint256) {
     uint256 projectId = projectIdCounter;
     map_id_info[projectId].projectName = _projectName;
-    map_id_info[projectId].submitee = msg.sender;
+    map_id_info[projectId].submitter = msg.sender;
     map_id_info[projectId].metaData = _metaData;
     map_id_info[projectId].bountyStatus = false;
     projectIdCounter++;
