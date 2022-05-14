@@ -20,6 +20,7 @@ contract ProjectRegistry is Ownable {
     bool bountyStatus;
     ContractInfo[] contracts;
     uint256 contractCount;
+    bool active;
   }
 
   struct ContractInfo{
@@ -29,6 +30,7 @@ contract ProjectRegistry is Ownable {
     string contractSourceUri;
     address contractAddr;
     bool bountyStatus;
+    bool active;
   }
 
   mapping(uint256 => ProjectInfo) public map_id_info;
@@ -38,30 +40,47 @@ contract ProjectRegistry is Ownable {
     aud = _aud;
   }
 
-  function registerProject (string memory _projectName, string memory _metaData) public returns (uint256) {
+  function registerProject(string memory _projectName, string memory _metaData) public returns (uint256) {
+    uint256 requiredAudn = 20 * 10 ** decimals();
+    require(aud.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
+    aud.safeTransferFrom(msg.sender, address(this), requiredAudn);
     uint256 projectId = projectIdCounter;
     map_id_info[projectId].projectName = _projectName;
     map_id_info[projectId].submitter = msg.sender;
     map_id_info[projectId].metaData = _metaData;
     map_id_info[projectId].bountyStatus = false;
+    map_id_info[projectId].active = true;
     projectIdCounter++;
     return projectId;
   }
 
-  function registerContract (uint256 _projectId, string memory _contractName, string memory _contractSourceUri, address _contractAddr) public returns (uint256) {
+  function registerContract(uint256 _projectId, string memory _contractName, string memory _contractSourceUri, address _contractAddr) public returns (uint256) {
+    uint256 requiredAudn = 20 * 10 ** decimals();
+    require(aud.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
+    aud.safeTransferFrom(msg.sender, address(this), requiredAudn);
     uint256 _contractId = map_id_info[_projectId].contractCount;
-    ContractInfo memory inputContract = ContractInfo(_projectId, _contractId, _contractName, _contractSourceUri, _contractAddr, false);
+    ContractInfo memory inputContract = ContractInfo(_projectId, _contractId, _contractName, _contractSourceUri, _contractAddr, false, true);
     map_id_info[_projectId].contracts.push(inputContract);
     map_id_info[_projectId].contractCount++;
     return _contractId;
 
   }
 
-  function getContractInfo (uint256 _projectId, uint256 _contractId) public returns (ContractInfo memory) {
+  function rejectProject(uint256 _projectId) public {
+    require(map_id_info[_projectId].active);
+    map_id_info[projectId].active = false;
+  }
+
+  function rejectContract(uint256 _projectId, uint256 _contractId) public {
+    require(map_id_info[_projectId].contracts[_contractId].active);
+    map_id_info[_projectId].contracts[_contractId].active = false;
+  }
+
+  function getContractInfo(uint256 _projectId, uint256 _contractId) public returns (ContractInfo memory) {
     return map_id_info[_projectId].contracts[_contractId];
   }
 
-  function getContractCount (uint256 _projectId) public returns (uint256) {
+  function getContractCount(uint256 _projectId) public returns (uint256) {
     return map_id_info[_projectId].contractCount;
   }
 

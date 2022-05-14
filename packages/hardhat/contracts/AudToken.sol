@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 contract AudToken is ERC20, Ownable, ERC20Permit, ERC20Votes {
-    constructor() ERC20("Audition Token", "AUD") ERC20Permit("Audition Token") {
+    constructor() ERC20("Audition Token", "AUDN") ERC20Permit("Audition Token") {
         _mint(msg.sender, 100000 * 10 ** decimals());
     }
 

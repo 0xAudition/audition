@@ -11,7 +11,7 @@ contract AudVote is ERC20Votes, Ownable {
   using SafeERC20 for IERC20;
 
   string public _name = "Audition Vote Token";
-  string public _symbol = "vAUD";
+  string public _symbol = "vAUDN";
 
   IERC20 public aud;
 

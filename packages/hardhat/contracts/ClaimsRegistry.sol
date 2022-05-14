@@ -43,6 +43,9 @@ contract ClaimsRegistry is ERC721, Ownable {
   }
 
   function registerClaim(ClaimInfo memory _claim) public returns (uint256){
+    uint256 requiredAudn = 20 * 10 ** decimals();
+    require(aud.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
+    aud.safeTransferFrom(msg.sender, address(this), requiredAudn);
     ClaimInfo memory claim = _claim;
     uint256 claimId = claimIdCounter;
     claimId_info_map[claimId] = claim;
