@@ -34,14 +34,14 @@ contract ProjectRegistry is Ownable {
   }
 
   mapping(uint256 => ProjectInfo) public map_id_info;
-  uint256 projectIdCounter = 0;
+  uint256 public projectIdCounter = 0;
 
   constructor(IERC20 _aud) {
     aud = _aud;
   }
 
   function registerProject(string memory _projectName, string memory _metaData) public returns (uint256) {
-    uint256 requiredAudn = 20 * 10 ** decimals();
+    uint256 requiredAudn = 20 * 10 ** 18;
     require(aud.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
     aud.safeTransferFrom(msg.sender, address(this), requiredAudn);
     uint256 projectId = projectIdCounter;
@@ -55,7 +55,7 @@ contract ProjectRegistry is Ownable {
   }
 
   function registerContract(uint256 _projectId, string memory _contractName, string memory _contractSourceUri, address _contractAddr) public returns (uint256) {
-    uint256 requiredAudn = 20 * 10 ** decimals();
+    uint256 requiredAudn = 20 * 10 ** 18;
     require(aud.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
     aud.safeTransferFrom(msg.sender, address(this), requiredAudn);
     uint256 _contractId = map_id_info[_projectId].contractCount;
@@ -68,7 +68,7 @@ contract ProjectRegistry is Ownable {
 
   function rejectProject(uint256 _projectId) public {
     require(map_id_info[_projectId].active);
-    map_id_info[projectId].active = false;
+    map_id_info[_projectId].active = false;
   }
 
   function rejectContract(uint256 _projectId, uint256 _contractId) public {
@@ -84,5 +84,15 @@ contract ProjectRegistry is Ownable {
     return map_id_info[_projectId].contractCount;
   }
 
+  function getProjectInfo(uint256 _projectId) public returns (ProjectInfo memory) {
+    return map_id_info[_projectId];
+  }
 
+  function getProjectCount() public returns (uint256){
+    return projectIdCounter;
+  }
+
+  function getProjectName(uint256 _projectId) public returns (string memory){
+    return map_id_info[_projectId].projectName;
+  }
 }

@@ -10,8 +10,8 @@ contract ClaimsRegistry is ERC721, Ownable {
   using SafeERC20 for IERC20;
 
   IERC20 public aud;
-  string public _name = "AUDCLAIMS";
-  string public _symbol = "AUDCLAIMS";
+  string public _name = "AUDNCLAIMS";
+  string public _symbol = "AUDNCLAIMS";
 
   struct ClaimInfo {
     uint256 projectId;
@@ -43,7 +43,7 @@ contract ClaimsRegistry is ERC721, Ownable {
   }
 
   function registerClaim(ClaimInfo memory _claim) public returns (uint256){
-    uint256 requiredAudn = 20 * 10 ** decimals();
+    uint256 requiredAudn = 20 * 10 ** 18;
     require(aud.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
     aud.safeTransferFrom(msg.sender, address(this), requiredAudn);
     ClaimInfo memory claim = _claim;
