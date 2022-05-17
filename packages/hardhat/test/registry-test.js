@@ -43,15 +43,14 @@ describe("Audition ProjectRegistry", function () {
 
       await ProjectRegistry.registerProject("TombFork", "tombfork.io");
 
-      expect(await ProjectRegistry.projectIdCounter()).to.equal('1');
-      // let projectCounter = await ProjectRegistry.getProjectCount();
-      // console.log("project counter: ", projectCounter.v);
+      expect(await ProjectRegistry.getProjectCount()).to.equal("1");
 
-      let projectName = await ProjectRegistry.getProjectName(0);
-      console.log("project name: ", projectName);
+      let projectInfo = await ProjectRegistry.getProjectInfo(0);
+      console.log("project info: ", projectInfo);
 
-      // let project = await ProjectRegistry.getProjectInfo(0);
-      // console.log("project info :", project);
+      expect(projectInfo.projectName).to.equal("TombFork");
+      expect(projectInfo.metaData).to.equal("tombfork.io");
+      expect(projectInfo.submitter).to.equal(owner.address);
     });
 
   });

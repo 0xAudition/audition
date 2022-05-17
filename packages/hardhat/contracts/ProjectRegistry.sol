@@ -56,14 +56,13 @@ contract ProjectRegistry is Ownable {
 
   function registerContract(uint256 _projectId, string memory _contractName, string memory _contractSourceUri, address _contractAddr) public returns (uint256) {
     uint256 requiredAudn = 20 * 10 ** 18;
-    require(aud.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
+    require(aud.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register contract");
     aud.safeTransferFrom(msg.sender, address(this), requiredAudn);
     uint256 _contractId = map_id_info[_projectId].contractCount;
     ContractInfo memory inputContract = ContractInfo(_projectId, _contractId, _contractName, _contractSourceUri, _contractAddr, false, true);
     map_id_info[_projectId].contracts.push(inputContract);
     map_id_info[_projectId].contractCount++;
     return _contractId;
-
   }
 
   function rejectProject(uint256 _projectId) public {
@@ -76,23 +75,20 @@ contract ProjectRegistry is Ownable {
     map_id_info[_projectId].contracts[_contractId].active = false;
   }
 
-  function getContractInfo(uint256 _projectId, uint256 _contractId) public returns (ContractInfo memory) {
+  function getContractInfo(uint256 _projectId, uint256 _contractId) public view returns (ContractInfo memory) {
     return map_id_info[_projectId].contracts[_contractId];
   }
 
-  function getContractCount(uint256 _projectId) public returns (uint256) {
+  function getContractCount(uint256 _projectId) public view returns (uint256) {
     return map_id_info[_projectId].contractCount;
   }
 
-  function getProjectInfo(uint256 _projectId) public returns (ProjectInfo memory) {
+  function getProjectInfo(uint256 _projectId) public view returns (ProjectInfo memory) {
     return map_id_info[_projectId];
   }
 
-  function getProjectCount() public returns (uint256){
+  function getProjectCount() public view returns (uint256){
     return projectIdCounter;
   }
 
-  function getProjectName(uint256 _projectId) public returns (string memory){
-    return map_id_info[_projectId].projectName;
-  }
 }
