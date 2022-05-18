@@ -65,13 +65,13 @@ contract ProjectRegistry is Ownable {
     return _contractId;
   }
 
-  function rejectProject(uint256 _projectId) public {
-    require(map_id_info[_projectId].active);
+  function rejectProject(uint256 _projectId) public onlyOwner{
+    require(map_id_info[_projectId].active, "project is already deactivated");
     map_id_info[_projectId].active = false;
   }
 
-  function rejectContract(uint256 _projectId, uint256 _contractId) public {
-    require(map_id_info[_projectId].contracts[_contractId].active);
+  function rejectContract(uint256 _projectId, uint256 _contractId) public onlyOwner{
+    require(map_id_info[_projectId].contracts[_contractId].active, "contract is already deactivated");
     map_id_info[_projectId].contracts[_contractId].active = false;
   }
 
@@ -90,5 +90,6 @@ contract ProjectRegistry is Ownable {
   function getProjectCount() public view returns (uint256){
     return projectIdCounter;
   }
+
 
 }
