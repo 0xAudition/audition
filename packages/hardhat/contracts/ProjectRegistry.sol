@@ -79,6 +79,10 @@ contract ProjectRegistry is Ownable {
     return map_id_info[_projectId].contracts[_contractId];
   }
 
+  function getContractsFromProject(uint256 _projectId) public view returns (ContractInfo[] memory) {
+    return map_id_info[_projectId].contracts;
+  }
+
   function getContractCount(uint256 _projectId) public view returns (uint256) {
     return map_id_info[_projectId].contractCount;
   }

@@ -42,7 +42,7 @@ contract ClaimsRegistry is ERC721, Ownable {
     aud = _aud;
   }
 
-  function registerClaim(uint256 _projectId, uint256 _contractId, address _contractAddress, string _metaData) public returns (uint256){
+  function registerClaim(uint256 _projectId, uint256 _contractId, address _contractAddress, string memory _metaData) public returns (uint256){
     uint256 requiredAudn = 20 * 10 ** 18;
     require(aud.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
     aud.safeTransferFrom(msg.sender, address(this), requiredAudn);
@@ -57,13 +57,9 @@ contract ClaimsRegistry is ERC721, Ownable {
     return claimId;
   }
 
-  function approveClaim(uint256 _claimId) public onlyOwner{
-    require(!claimId_info_map[_claimId].approved, "claim is already approved");
-    claimId_info_map[_claimId].approved = true;
-  }
 
   function rejectClaim(uint256 _claimId) public onlyOwner{
-    require(claim_info_map[_claimId].approved, "claim is already rejected");
+    require(claimId_info_map[_claimId].approved, "claim is already rejected");
     claimId_info_map[_claimId].approved = false;
   }
 
@@ -71,9 +67,9 @@ contract ClaimsRegistry is ERC721, Ownable {
   //
   // }
 
-  function approveClaim(uint256 _claimId) public returns (bool) {
+  function approveClaim(uint256 _claimId) public onlyOwner{
+    require(!claimId_info_map[_claimId].approved, "claim is already approved");
     claimId_info_map[_claimId].approved = true;
     claimId_info_map[_claimId].claimStart = block.number;
-    return true;
   }
 }

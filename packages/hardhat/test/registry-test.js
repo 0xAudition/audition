@@ -95,7 +95,12 @@ describe("Audition ProjectRegistry", function () {
       expect(contractInfo.contractAddr).to.equal('0xF491e7B69E4244ad4002BC14e878a34207E38c29');
       expect(contractInfo.bountyStatus).to.equal(false);
       expect(contractInfo.active).to.equal(true);
+
+      let contracts = await ProjectRegistry.getContractsFromProject(0);
+
+      console.log("contracts: ", contracts);
     });
+
 
     it("Should deactivate project and contracts (onlyOwner)", async function () {
       expect(await ProjectRegistry.getProjectCount()).to.equal("1");
@@ -117,10 +122,12 @@ describe("Audition ProjectRegistry", function () {
       await expect(ProjectRegistry.rejectProject(0))
         .to.be.revertedWith('project is already deactivated');
 
-      await expect(ProjectRegistry.rejectContract(0,0)) 
+      await expect(ProjectRegistry.rejectContract(0,0))
         .to.be.revertedWith('contract is already deactivated');
 
     });
+
+    
 
   });
 });
