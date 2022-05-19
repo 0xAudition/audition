@@ -18,7 +18,7 @@ contract ClaimsRegistry is ERC721, Ownable {
     uint256 contractId;
     address contractAddress;
     address submitter;
-    string metadata;
+    string metaData;
     uint256 claimType;
     // uint256 claimLength;
     uint256 claimStart;
@@ -35,24 +35,41 @@ contract ClaimsRegistry is ERC721, Ownable {
   }
 
   mapping(uint256 => ClaimInfo) public claimId_info_map;
-  mapping(uint256 => uint256) public projectId_claimId_map;
+  mapping(uint256 => uint256[]) public projectId_claimId_map;
   uint256 claimIdCounter = 0;
 
   constructor(IERC20 _aud) ERC721(_name, _symbol) {
     aud = _aud;
   }
 
-  function registerClaim(ClaimInfo memory _claim) public returns (uint256){
+  function registerClaim(uint256 _projectId, uint256 _contractId, address _contractAddress, string _metaData) public returns (uint256){
     uint256 requiredAudn = 20 * 10 ** 18;
     require(aud.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
     aud.safeTransferFrom(msg.sender, address(this), requiredAudn);
-    ClaimInfo memory claim = _claim;
     uint256 claimId = claimIdCounter;
-    claimId_info_map[claimId] = claim;
-    projectId_claimId_map[claim.projectId] = claimId;
+    claimId_info_map[claimId].projectId = _projectId;
+    claimId_info_map[claimId].contractId = _contractId;
+    claimId_info_map[claimId].contractAddress = _contractAddress;
+    claimId_info_map[claimId].submitter = msg.sender;
+    claimId_info_map[claimId].metaData = _metaData;
+    projectId_claimId_map[_projectId].push(claimId);
     claimIdCounter++;
     return claimId;
   }
+
+  function approveClaim(uint256 _claimId) public onlyOwner{
+    require(!claimId_info_map[_claimId].approved, "claim is already approved");
+    claimId_info_map[_claimId].approved = true;
+  }
+
+  function rejectClaim(uint256 _claimId) public onlyOwner{
+    require(claim_info_map[_claimId].approved, "claim is already rejected");
+    claimId_info_map[_claimId].approved = false;
+  }
+
+  // function withdrawClaim(uint256 _claimId) public {
+  //
+  // }
 
   function approveClaim(uint256 _claimId) public returns (bool) {
     claimId_info_map[_claimId].approved = true;
