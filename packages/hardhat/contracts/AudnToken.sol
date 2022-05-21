@@ -6,12 +6,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
-contract AudToken is ERC20, Ownable, ERC20Permit, ERC20Votes {
+contract AudnToken is ERC20, Ownable, ERC20Permit, ERC20Votes {
     constructor() ERC20("Audition Token", "AUDN") ERC20Permit("Audition Token") {
         _mint(msg.sender, 100000 * 10 ** decimals());
     }
 
-    function mint(address to, uint256 amount) public {
+    function mint(address to, uint256 amount) public {      // SHOULD BE ONLY OWNER
         _mint(to, amount);
     }
 

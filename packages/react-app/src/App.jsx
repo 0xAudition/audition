@@ -290,7 +290,7 @@ function App(props) {
             */}
 
           <Contract
-            name="AudGovernor"
+            name="AudnGovernor"
             price={price}
             signer={userSigner}
             provider={localProvider}
@@ -317,7 +317,7 @@ function App(props) {
             contractConfig={contractConfig}
           />
           <Contract
-            name="AudToken"
+            name="AudnToken"
             price={price}
             signer={userSigner}
             provider={localProvider}
@@ -325,17 +325,7 @@ function App(props) {
             blockExplorer={blockExplorer}
             contractConfig={contractConfig}
           />
-          <Contract
-            name="AudVote"
-            price={price}
-            signer={userSigner}
-            provider={localProvider}
-            address={address}
-            blockExplorer={blockExplorer}
-            contractConfig={contractConfig}
-          />
-
-
+          
         </Route>
         <Route path="/hints">
           <Hints

@@ -17,7 +17,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   const { deployer } = await getNamedAccounts();
   const chainId = await getChainId();
 
-  await deploy("AudToken", {
+  await deploy("AudnToken", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
     // args: [ "Hello", ethers.utils.parseEther("1.5") ],
@@ -26,25 +26,16 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   });
 
   // Getting a previously deployed contract
-  const AudToken = await ethers.getContract("AudToken", deployer);
-  const audAddress = AudToken.address;
+  const AudnToken = await ethers.getContract("AudnToken", deployer);
+  const audnAddress = AudnToken.address;
 
-  await deploy("AudVote", {
-    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
-    from: deployer,
-    // args: [ "Hello", ethers.utils.parseEther("1.5") ],
-    args: [audAddress],
-    log: true,
-    waitConfirmations: 5,
-  });
-
-  const AudVote = await ethers.getContract("AudVote", deployer);
+  
 
   await deploy("ProjectRegistry", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
     // args: [ "Hello", ethers.utils.parseEther("1.5") ],
-    args: [audAddress],
+    args: [audnAddress],
     log: true,
     waitConfirmations: 5,
   });
@@ -55,16 +46,16 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
     // args: [ "Hello", ethers.utils.parseEther("1.5") ],
-    args: [audAddress],
+    args: [audnAddress],
     log: true,
     waitConfirmations: 5,
   });
 
-  await deploy("AudGovernor", {
+  await deploy("AudnGovernor", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
     // args: [ "Hello", ethers.utils.parseEther("1.5") ],
-    args: [audAddress],
+    args: [audnAddress],
     log: true,
     waitConfirmations: 5,
   });
