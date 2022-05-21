@@ -45,11 +45,12 @@ describe("Audition ProjectRegistry", function () {
     it("Should register project with given data", async function (){
       await Token.approve(ProjectRegistry.address, approveAmount, {from: owner.address});
 
-      await ProjectRegistry.registerProject("TombFork", "tombfork.io");
+      await ProjectRegistry.registerProject("TombFork", "tombfork.io", "Boardroom", "ipfs://forkboardroom", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F");
 
       expect(await ProjectRegistry.getProjectCount()).to.equal("1");
+      expect(await ProjectRegistry.getContractCount(1)).to.equal("1");
 
-      let projectInfo = await ProjectRegistry.getProjectInfo(0);
+      let projectInfo = await ProjectRegistry.getProjectInfo(1);
       // console.log("project info: ", projectInfo);
 
       expect(projectInfo.projectName).to.equal("TombFork");
@@ -59,44 +60,49 @@ describe("Audition ProjectRegistry", function () {
 
     it("Should register contracts with given data", async function () {
       await expect(ProjectRegistry.registerContract(0, "Vaults", "ipfs://somehash", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F"))
+        .to.be.revertedWith('invalid project id');
+
+      await expect(ProjectRegistry.registerContract(1, "Vaults", "ipfs://somehash", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F"))
         .to.be.revertedWith('ERC20: insufficient allowance');
+
+      console.log("not here");
 
       await Token.approve(ProjectRegistry.address, approveAmount, {from: owner.address});
 
-      await ProjectRegistry.registerContract(0, "Vaults", "ipfs://somehash", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F");
+      await ProjectRegistry.registerContract(1, "Vaults", "ipfs://somehash", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F");
 
-      expect(await ProjectRegistry.getContractCount(0)).to.equal('1'); //contract counter should go up for project
+      expect(await ProjectRegistry.getContractCount(1)).to.equal('2'); //contract counter should go up for project
 
-      let contractInfo = await ProjectRegistry.getContractInfo(0, 0);
+      let contractInfo = await ProjectRegistry.getContractInfo(1, 1);
 
-      expect(contractInfo.projectId).to.equal('0');
-      expect(contractInfo.contractId).to.equal('0');
+      expect(contractInfo.projectId).to.equal('1');
+      expect(contractInfo.contractId).to.equal('2');
       expect(contractInfo.contractName).to.equal("Vaults");
       expect(contractInfo.contractSourceUri).to.equal("ipfs://somehash");
       expect(contractInfo.contractAddr).to.equal('0xBd696eA529180b32e8c67F1888ed51Ac071cb56F');
       expect(contractInfo.bountyStatus).to.equal(false);
       expect(contractInfo.active).to.equal(true);
 
-      await expect(ProjectRegistry.registerContract(0, "Vaults", "ipfs://somehash", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F"))
+      await expect(ProjectRegistry.registerContract(1, "Vaults", "ipfs://somehash", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F"))
         .to.be.revertedWith('ERC20: insufficient allowance');
 
       await Token.approve(ProjectRegistry.address, approveAmount, {from: owner.address});
 
-      await ProjectRegistry.registerContract(0, "Router", "ipfs://somehashsomehash", "0xF491e7B69E4244ad4002BC14e878a34207E38c29");
+      await ProjectRegistry.registerContract(1, "Router", "ipfs://somehashsomehash", "0xF491e7B69E4244ad4002BC14e878a34207E38c29");
 
-      expect(await ProjectRegistry.getContractCount(0)).to.equal('2'); //contract counter should go up for project
+      expect(await ProjectRegistry.getContractCount(1)).to.equal('3'); //contract counter should go up for project
 
-      contractInfo = await ProjectRegistry.getContractInfo(0, 1);
+      contractInfo = await ProjectRegistry.getContractInfo(1, 2);
 
-      expect(contractInfo.projectId).to.equal('0');
-      expect(contractInfo.contractId).to.equal('1');
+      expect(contractInfo.projectId).to.equal('1');
+      expect(contractInfo.contractId).to.equal('3');
       expect(contractInfo.contractName).to.equal("Router");
       expect(contractInfo.contractSourceUri).to.equal("ipfs://somehashsomehash");
       expect(contractInfo.contractAddr).to.equal('0xF491e7B69E4244ad4002BC14e878a34207E38c29');
       expect(contractInfo.bountyStatus).to.equal(false);
       expect(contractInfo.active).to.equal(true);
 
-      let contracts = await ProjectRegistry.getContractsFromProject(0);
+      let contracts = await ProjectRegistry.getContractsFromProject(1);
 
       console.log("contracts: ", contracts);
     });
@@ -105,29 +111,29 @@ describe("Audition ProjectRegistry", function () {
     it("Should deactivate project and contracts (onlyOwner)", async function () {
       expect(await ProjectRegistry.getProjectCount()).to.equal("1");
 
-      await expect(ProjectRegistry.connect(addr1).rejectProject(0)) //only owner should be able to call reject project
+      await expect(ProjectRegistry.connect(addr1).rejectProject(1)) //only owner should be able to call reject project
         .to.be.revertedWith('Ownable: caller is not the owner');
 
-      await expect(ProjectRegistry.connect(addr1).rejectContract(0, 0)) //only owner should be able to call reject contract
+      await expect(ProjectRegistry.connect(addr1).rejectContract(1, 1)) //only owner should be able to call reject contract
         .to.be.revertedWith('Ownable: caller is not the owner');
 
-      await ProjectRegistry.rejectProject(0);
+      await ProjectRegistry.rejectProject(1);
 
-      expect((await ProjectRegistry.map_id_info(0)).active).to.equal(false);
+      expect((await ProjectRegistry.map_id_info(1)).active).to.equal(false);
 
-      await ProjectRegistry.rejectContract(0,0);
+      await ProjectRegistry.rejectContract(1,1);
 
-      expect((await ProjectRegistry.getContractInfo(0,0)).active).to.equal(false);
+      expect((await ProjectRegistry.getContractInfo(1,1)).active).to.equal(false);
 
-      await expect(ProjectRegistry.rejectProject(0))
+      await expect(ProjectRegistry.rejectProject(1))
         .to.be.revertedWith('project is already deactivated');
 
-      await expect(ProjectRegistry.rejectContract(0,0))
+      await expect(ProjectRegistry.rejectContract(1,1))
         .to.be.revertedWith('contract is already deactivated');
 
     });
 
-    
+
 
   });
 });

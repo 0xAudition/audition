@@ -9,9 +9,11 @@ contract ClaimsRegistry is ERC721, Ownable {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
 
-  IERC20 public aud;
+  IERC20 public audn;
   string public _name = "AUDNCLAIMS";
   string public _symbol = "AUDNCLAIMS";
+
+  uint256 requiredAudn = 20;
 
   struct ClaimInfo {
     uint256 projectId;
@@ -38,14 +40,13 @@ contract ClaimsRegistry is ERC721, Ownable {
   mapping(uint256 => uint256[]) public projectId_claimId_map;
   uint256 claimIdCounter = 0;
 
-  constructor(IERC20 _aud) ERC721(_name, _symbol) {
-    aud = _aud;
+  constructor(IERC20 _audn) ERC721(_name, _symbol) {
+    audn = _audn;
   }
 
   function registerClaim(uint256 _projectId, uint256 _contractId, address _contractAddress, string memory _metaData) public returns (uint256){
-    uint256 requiredAudn = 20 * 10 ** 18;
-    require(aud.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register claim");
-    aud.safeTransferFrom(msg.sender, address(this), requiredAudn);
+    require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register claim");
+    audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
     uint256 claimId = claimIdCounter;
     claimId_info_map[claimId].projectId = _projectId;
     claimId_info_map[claimId].contractId = _contractId;
@@ -53,6 +54,7 @@ contract ClaimsRegistry is ERC721, Ownable {
     claimId_info_map[claimId].submitter = msg.sender;
     claimId_info_map[claimId].metaData = _metaData;
     projectId_claimId_map[_projectId].push(claimId);
+    _mint(msg.sender, claimId);
     claimIdCounter++;
     return claimId;
   }
@@ -71,5 +73,9 @@ contract ClaimsRegistry is ERC721, Ownable {
     require(!claimId_info_map[_claimId].approved, "claim is already approved");
     claimId_info_map[_claimId].approved = true;
     claimId_info_map[_claimId].claimStart = block.number;
+  }
+
+  function setRequiredAudn(uint256 _value) public{
+    requiredAudn = _value;
   }
 }
