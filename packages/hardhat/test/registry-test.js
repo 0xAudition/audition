@@ -51,11 +51,20 @@ describe("Audition ProjectRegistry", function () {
       expect(await ProjectRegistry.getContractCount(1)).to.equal("1");
 
       let projectInfo = await ProjectRegistry.getProjectInfo(1);
-      // console.log("project info: ", projectInfo);
+      let contractInfo = await ProjectRegistry.getContractInfo(1, 0);
 
       expect(projectInfo.projectName).to.equal("TombFork");
       expect(projectInfo.metaData).to.equal("tombfork.io");
       expect(projectInfo.submitter).to.equal(owner.address);
+
+      expect(contractInfo.projectId).to.equal('1');
+      expect(contractInfo.contractId).to.equal('1');
+      expect(contractInfo.contractName).to.equal("Boardroom");
+      expect(contractInfo.contractSourceUri).to.equal("ipfs://forkboardroom");
+      expect(contractInfo.contractAddr).to.equal('0xBd696eA529180b32e8c67F1888ed51Ac071cb56F');
+      expect(contractInfo.bountyStatus).to.equal(false);
+      expect(contractInfo.active).to.equal(true);
+
     });
 
     it("Should register contracts with given data", async function () {

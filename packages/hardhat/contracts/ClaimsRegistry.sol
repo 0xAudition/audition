@@ -13,7 +13,7 @@ contract ClaimsRegistry is ERC721, Ownable {
   string public _name = "AUDNCLAIMS";
   string public _symbol = "AUDNCLAIMS";
 
-  uint256 requiredAudn = 20;
+  uint256 requiredAudn = 20 * 10 ** 18;
 
   struct ClaimInfo {
     uint256 projectId;
