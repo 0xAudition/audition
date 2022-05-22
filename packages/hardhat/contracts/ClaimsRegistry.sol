@@ -4,12 +4,14 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./IProjectRegistry.sol";
 
 contract ClaimsRegistry is ERC721, Ownable {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
 
   IERC20 public audn;
+  IProjectRegistry public projectRegistry;
   string public _name = "AUDNCLAIMS";
   string public _symbol = "AUDNCLAIMS";
 
@@ -40,11 +42,14 @@ contract ClaimsRegistry is ERC721, Ownable {
   mapping(uint256 => uint256[]) public projectId_claimId_map;
   uint256 claimIdCounter = 0;
 
+  event RegisterClaim(address _from, uint256 _projectId, uint256 _contractId, address _contractAddress, string _metaData);
+
   constructor(IERC20 _audn) ERC721(_name, _symbol) {
     audn = _audn;
   }
 
   function registerClaim(uint256 _projectId, uint256 _contractId, address _contractAddress, string memory _metaData) public returns (uint256){
+    require(projectRegistry.verifyContract(_projectId, _contractId));
     require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register claim");
     audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
     uint256 claimId = claimIdCounter;
@@ -56,9 +61,13 @@ contract ClaimsRegistry is ERC721, Ownable {
     projectId_claimId_map[_projectId].push(claimId);
     _mint(msg.sender, claimId);
     claimIdCounter++;
+    emit RegisterClaim(msg.sender, _projectId, _contractId, _contractAddress, _metaData);
     return claimId;
   }
 
+  function setProjectRegistry(IProjectRegistry _projectRegistry) public onlyOwner{
+    projectRegistry = _projectRegistry;
+  }
 
   function rejectClaim(uint256 _claimId) public onlyOwner{
     require(claimId_info_map[_claimId].approved, "claim is already rejected");

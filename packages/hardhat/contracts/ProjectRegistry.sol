@@ -20,7 +20,7 @@ contract ProjectRegistry is Ownable {
     // uint256 proposalType;
     string metaData;
     bool bountyStatus;
-    ContractInfo[] contracts;
+    mapping(uint256 => ContractInfo) contracts;
     uint256 contractCount;
     bool active;
   }
@@ -61,8 +61,14 @@ contract ProjectRegistry is Ownable {
     map_id_info[projectId].metaData = _metaData;
     map_id_info[projectId].bountyStatus = false;
     map_id_info[projectId].active = true;
-    ContractInfo memory inputContract = ContractInfo(projectId, 1, _contractName, _contractSourceUri, _contractAddress, false, true);
-    map_id_info[projectId].contracts.push(inputContract);
+    // ContractInfo memory inputContract = ContractInfo(projectId, 1, _contractName, _contractSourceUri, _contractAddress, false, true);
+    // map_id_info[projectId].contracts.push(inputContract);
+    map_id_info[projectId].contracts[1].projectId = projectId;
+    map_id_info[projectId].contracts[1].contractId = 1;
+    map_id_info[projectId].contracts[1].contractName = _contractName;
+    map_id_info[projectId].contracts[1].contractSourceUri = _contractSourceUri;
+    map_id_info[projectId].contracts[1].contractAddr = _contractAddress;
+    map_id_info[projectId].contracts[1].active = true;
     map_id_info[projectId].contractCount++;
     projectIdCounter++;
     emit RegisterProject(msg.sender, projectId, _projectName, _metaData);
@@ -75,8 +81,14 @@ contract ProjectRegistry is Ownable {
     require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register contract");
     audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
     uint256 contractId = map_id_info[_projectId].contractCount + 1;
-    ContractInfo memory inputContract = ContractInfo(_projectId, contractId, _contractName, _contractSourceUri, _contractAddress, false, true);
-    map_id_info[_projectId].contracts.push(inputContract);
+    // ContractInfo memory inputContract = ContractInfo(_projectId, contractId, _contractName, _contractSourceUri, _contractAddress, false, true);
+    // map_id_info[_projectId].contracts.push(inputContract);
+    map_id_info[_projectId].contracts[contractId].projectId = _projectId;
+    map_id_info[_projectId].contracts[contractId].contractId = contractId;
+    map_id_info[_projectId].contracts[contractId].contractName = _contractName;
+    map_id_info[_projectId].contracts[contractId].contractSourceUri = _contractSourceUri;
+    map_id_info[_projectId].contracts[contractId].contractAddr = _contractAddress;
+    map_id_info[_projectId].contracts[contractId].active = true;
     map_id_info[_projectId].contractCount++;
     emit RegisterContract(msg.sender, _projectId, contractId, _contractSourceUri, _contractAddress);
   }
@@ -98,7 +110,7 @@ contract ProjectRegistry is Ownable {
   function getBounties(uint256 _projectId) public view returns(BountyInfo[] memory) {
     return map_id_bounty[_projectId];
   }
-  
+
   function rejectContract(uint256 _projectId, uint256 _contractId) public onlyOwner{
     require(map_id_info[_projectId].contracts[_contractId].active, "contract is already deactivated");
     map_id_info[_projectId].contracts[_contractId].active = false;
@@ -108,26 +120,35 @@ contract ProjectRegistry is Ownable {
     requiredAudn = _value;
   }
 
-  function validateProjAndContract(uint256 _projectId) public returns(bool) {
-      require(map_id_info[_projectId].active, "Project is not valid");
-
+  function verifyContract(uint256 _projectId, uint256 _contractId) public returns(bool) {
+      require(map_id_info[_projectId].active, "project is invalid");
+      require(map_id_info[_projectId].contracts[_contractId].active, "contract is invalid");
+      return true;
   }
+
 
   function getContractInfo(uint256 _projectId, uint256 _contractId) public view returns (ContractInfo memory) {
     return map_id_info[_projectId].contracts[_contractId];
   }
 
   function getContractsFromProject(uint256 _projectId) public view returns (ContractInfo[] memory) {
-    return map_id_info[_projectId].contracts;
+    require(map_id_info[_projectId].contractCount > 0, "contract count is 0");
+    uint256 count = map_id_info[_projectId].contractCount;
+    ContractInfo[] memory contracts = new ContractInfo[](count);
+    for(uint i = 1; i <= count; i++) {
+      ContractInfo memory pushContract = map_id_info[_projectId].contracts[i];
+      contracts[i-1] = pushContract;
+    }
+    return contracts;
   }
 
   function getContractCount(uint256 _projectId) public view returns (uint256) {
     return map_id_info[_projectId].contractCount;
   }
 
-  function getProjectInfo(uint256 _projectId) public view returns (ProjectInfo memory) {
-    return map_id_info[_projectId];
-  }
+  // function getProjectInfo(uint256 _projectId) public view returns (ProjectInfo memory) {
+  //   return map_id_info[_projectId];
+  // }
 
   function getProjectCount() public view returns (uint256){
     return projectIdCounter;

@@ -50,12 +50,12 @@ describe("Audition ProjectRegistry", function () {
       expect(await ProjectRegistry.getProjectCount()).to.equal("1");
       expect(await ProjectRegistry.getContractCount(1)).to.equal("1");
 
-      let projectInfo = await ProjectRegistry.getProjectInfo(1);
-      let contractInfo = await ProjectRegistry.getContractInfo(1, 0);
+      // let projectInfo = await ProjectRegistry.getProjectInfo(1);
+      let contractInfo = await ProjectRegistry.getContractInfo(1, 1);
 
-      expect(projectInfo.projectName).to.equal("TombFork");
-      expect(projectInfo.metaData).to.equal("tombfork.io");
-      expect(projectInfo.submitter).to.equal(owner.address);
+      // expect(projectInfo.projectName).to.equal("TombFork");
+      // expect(projectInfo.metaData).to.equal("tombfork.io");
+      // expect(projectInfo.submitter).to.equal(owner.address);
 
       expect(contractInfo.projectId).to.equal('1');
       expect(contractInfo.contractId).to.equal('1');
@@ -82,7 +82,7 @@ describe("Audition ProjectRegistry", function () {
 
       expect(await ProjectRegistry.getContractCount(1)).to.equal('2'); //contract counter should go up for project
 
-      let contractInfo = await ProjectRegistry.getContractInfo(1, 1);
+      let contractInfo = await ProjectRegistry.getContractInfo(1, 2);
 
       expect(contractInfo.projectId).to.equal('1');
       expect(contractInfo.contractId).to.equal('2');
@@ -101,7 +101,7 @@ describe("Audition ProjectRegistry", function () {
 
       expect(await ProjectRegistry.getContractCount(1)).to.equal('3'); //contract counter should go up for project
 
-      contractInfo = await ProjectRegistry.getContractInfo(1, 2);
+      contractInfo = await ProjectRegistry.getContractInfo(1, 3);
 
       expect(contractInfo.projectId).to.equal('1');
       expect(contractInfo.contractId).to.equal('3');
