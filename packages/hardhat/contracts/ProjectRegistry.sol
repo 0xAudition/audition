@@ -4,9 +4,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./IProjectRegistry.sol";
 
-
-contract ProjectRegistry is Ownable {
+contract ProjectRegistry is IProjectRegistry, Ownable {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
 
@@ -61,8 +61,6 @@ contract ProjectRegistry is Ownable {
     map_id_info[projectId].metaData = _metaData;
     map_id_info[projectId].bountyStatus = false;
     map_id_info[projectId].active = true;
-    // ContractInfo memory inputContract = ContractInfo(projectId, 1, _contractName, _contractSourceUri, _contractAddress, false, true);
-    // map_id_info[projectId].contracts.push(inputContract);
     map_id_info[projectId].contracts[1].projectId = projectId;
     map_id_info[projectId].contracts[1].contractId = 1;
     map_id_info[projectId].contracts[1].contractName = _contractName;
@@ -81,8 +79,6 @@ contract ProjectRegistry is Ownable {
     require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register contract");
     audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
     uint256 contractId = map_id_info[_projectId].contractCount + 1;
-    // ContractInfo memory inputContract = ContractInfo(_projectId, contractId, _contractName, _contractSourceUri, _contractAddress, false, true);
-    // map_id_info[_projectId].contracts.push(inputContract);
     map_id_info[_projectId].contracts[contractId].projectId = _projectId;
     map_id_info[_projectId].contracts[contractId].contractId = contractId;
     map_id_info[_projectId].contracts[contractId].contractName = _contractName;
@@ -120,12 +116,11 @@ contract ProjectRegistry is Ownable {
     requiredAudn = _value;
   }
 
-  function verifyContract(uint256 _projectId, uint256 _contractId) public returns(bool) {
+  function verifyContract(uint256 _projectId, uint256 _contractId) external view override returns(bool) {
       require(map_id_info[_projectId].active, "project is invalid");
       require(map_id_info[_projectId].contracts[_contractId].active, "contract is invalid");
       return true;
   }
-
 
   function getContractInfo(uint256 _projectId, uint256 _contractId) public view returns (ContractInfo memory) {
     return map_id_info[_projectId].contracts[_contractId];

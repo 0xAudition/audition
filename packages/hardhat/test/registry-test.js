@@ -129,6 +129,23 @@ describe("Audition ProjectRegistry", function () {
       expect(bounties[0].amount).to.equal(bountyAmount);
     });
 
+    it("Should register claims with given project info", async function () {
+      await ClaimsRegistry.setProjectRegistry(ProjectRegistry.address);
+
+      await Token.approve(ClaimsRegistry.address, approveAmount, {from: owner.address});
+
+      await ClaimsRegistry.registerClaim(1, 1, '0xBd696eA529180b32e8c67F1888ed51Ac071cb56F', 'some meta data possibly Json');
+
+      expect(await ClaimsRegistry.balanceOf(owner.address)).to.equal('1');
+
+      let claim = await ClaimsRegistry.getClaimInfo(1);
+
+      expect(claim.projectId).to.equal('1');
+      expect(claim.contractId).to.equal('1');
+      expect(claim.contractAddress).to.equal('0xBd696eA529180b32e8c67F1888ed51Ac071cb56F');
+      expect(claim.metaData).to.equal('some meta data possibly Json');
+    });
+
     it("Should deactivate project and contracts (onlyOwner)", async function () {
       expect(await ProjectRegistry.getProjectCount()).to.equal("1");
 
@@ -153,8 +170,6 @@ describe("Audition ProjectRegistry", function () {
         .to.be.revertedWith('contract is already deactivated');
 
     });
-
-
 
   });
 });

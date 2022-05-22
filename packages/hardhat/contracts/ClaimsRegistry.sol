@@ -52,7 +52,7 @@ contract ClaimsRegistry is ERC721, Ownable {
     require(projectRegistry.verifyContract(_projectId, _contractId));
     require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register claim");
     audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
-    uint256 claimId = claimIdCounter;
+    uint256 claimId = claimIdCounter + 1;
     claimId_info_map[claimId].projectId = _projectId;
     claimId_info_map[claimId].contractId = _contractId;
     claimId_info_map[claimId].contractAddress = _contractAddress;
@@ -86,5 +86,9 @@ contract ClaimsRegistry is ERC721, Ownable {
 
   function setRequiredAudn(uint256 _value) public{
     requiredAudn = _value;
+  }
+
+  function getClaimInfo(uint256 _claimId) public view returns(ClaimInfo memory) {
+    return claimId_info_map[_claimId];
   }
 }
