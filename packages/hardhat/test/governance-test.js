@@ -34,8 +34,8 @@ describe("Audition Voting", function () {
         let proposalInfo =
 
             it("Should deploy all contracts", async function () {
-                AudToken = await (await ethers.getContractFactory("AudnToken")).deploy();
-                AudGoverner = await (await ethers.getContractFactory("AudnGoverner")).deploy(AudToken.address);
+                AudToken = await (await ethers.getContractFactory("AudToken")).deploy();
+                AudGoverner = await (await ethers.getContractFactory("AudGovernor")).deploy(AudToken.address);
                 //...Other contracts
 
 
@@ -142,8 +142,8 @@ describe("Audition Voting", function () {
         let proposalInfo =
 
             it("Should deploy all contracts", async function () {
-                AudToken = await (await ethers.getContractFactory("AudnToken")).deploy();
-                AudGoverner = await (await ethers.getContractFactory("AudnGoverner")).deploy(AudToken.address);
+                AudToken = await (await ethers.getContractFactory("AudToken")).deploy();
+                AudGoverner = await (await ethers.getContractFactory("AudGovernor")).deploy(AudToken.address);
                 ProjectRegistry = await (await ethers.getContractFactory("ProjectRegistry")).deploy(AudToken.address);
                 ClaimsRegistry = await (await ethers.getContractFactory("ClaimsRegistry")).deploy(AudToken.address);
                 //...Other contracts

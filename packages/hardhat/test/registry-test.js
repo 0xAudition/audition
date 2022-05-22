@@ -144,6 +144,10 @@ describe("Audition ProjectRegistry", function () {
       expect(claim.contractId).to.equal('1');
       expect(claim.contractAddress).to.equal('0xBd696eA529180b32e8c67F1888ed51Ac071cb56F');
       expect(claim.metaData).to.equal('some meta data possibly Json');
+
+      let claimIds = await ClaimsRegistry.getClaimIds(1);
+
+      console.log("claim ids: ", claimIds);
     });
 
     it("Should deactivate project and contracts (onlyOwner)", async function () {

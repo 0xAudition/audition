@@ -91,4 +91,8 @@ contract ClaimsRegistry is ERC721, Ownable {
   function getClaimInfo(uint256 _claimId) public view returns(ClaimInfo memory) {
     return claimId_info_map[_claimId];
   }
+
+  function getClaimIds(uint256 _projectId) public view returns(uint256[] memory) {
+    return projectId_claimId_map[_projectId];
+  }
 }
