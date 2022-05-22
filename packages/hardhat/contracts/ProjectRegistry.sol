@@ -35,7 +35,14 @@ contract ProjectRegistry is Ownable {
     bool active;
   }
 
+  struct BountyInfo{
+    uint256 projectId;
+    address submitter;
+    uint256 amount;
+  }
+
   mapping(uint256 => ProjectInfo) public map_id_info;
+  mapping(uint256 => BountyInfo[]) public map_id_bounty;
   uint256 internal projectIdCounter = 0;
 
   event RegisterProject(address indexed _from, uint256 _id, string _name, string _metaData);
@@ -79,6 +86,19 @@ contract ProjectRegistry is Ownable {
     map_id_info[_projectId].active = false;
   }
 
+  function setBounty(uint256 _projectId, uint256 _amount) public {
+    require(map_id_info[_projectId].active, "project is currently not active");
+    uint256 bountyAmount = _amount * 10 ** decimals();
+    require(audn.balanceOf(msg.sender) >= bountyAmount, "insufficient AUDN balance to set bounty");
+    audn.safeTransferFrom(msg.sender, address(this), bountyAmount);
+    BountyInfo memory bounty = BountyInfo(_projectId, msg.sender, bountyAmount);
+    map_id_bounty[_projectId].push(bounty);
+  }
+
+  function getBounties(uint256 _projectId) public view returns(BountyInfo[] memory) {
+    return map_id_bounty[_projectId];
+  }
+  
   function rejectContract(uint256 _projectId, uint256 _contractId) public onlyOwner{
     require(map_id_info[_projectId].contracts[_contractId].active, "contract is already deactivated");
     map_id_info[_projectId].contracts[_contractId].active = false;

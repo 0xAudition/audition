@@ -29,7 +29,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   const AudnToken = await ethers.getContract("AudnToken", deployer);
   const audnAddress = AudnToken.address;
 
-  
+
 
   await deploy("ProjectRegistry", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
@@ -110,4 +110,4 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   //   console.error(error);
   // }
 };
-module.exports.tags = ["AudToken", "AudVote", "ProjectRegistry", "ClaimsRegistry"];
+module.exports.tags = ["AudnToken", "AudnGovernor", "ProjectRegistry", "ClaimsRegistry"];

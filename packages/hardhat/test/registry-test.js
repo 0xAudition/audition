@@ -7,7 +7,7 @@ use(solidity);
 describe("Audition ProjectRegistry", function () {
   const initialSupply = '100000000000000000000000'; //100k AUDN
   const approveAmount = '20000000000000000000'; //20 AUDN
-
+  const bountyAmount = '1000000000000000000000'; //1000 AUDN
 
   // quick fix to let gas reporter fetch data from gas station & coinmarketcap
   before((done) => {
@@ -27,7 +27,7 @@ describe("Audition ProjectRegistry", function () {
     let addr4;
 
     it("Should deploy ProjectRegistry and AUDN and set owner (owner should also have 100k AUDN tokens)", async function () {
-      Token = await (await ethers.getContractFactory("AudToken")).deploy();
+      Token = await (await ethers.getContractFactory("AudnToken")).deploy();
 
       ProjectRegistry = await (await ethers.getContractFactory("ProjectRegistry")).deploy(Token.address);
 
@@ -116,6 +116,18 @@ describe("Audition ProjectRegistry", function () {
       console.log("contracts: ", contracts);
     });
 
+    it("Should set bounties for given project", async function () {
+      await Token.mint(addr1.address, bountyAmount);
+      await Token.connect(addr1).approve(ProjectRegistry.address, bountyAmount);
+
+      await ProjectRegistry.connect(addr1).setBounty(1, 1000);
+
+      let bounties = await ProjectRegistry.getBounties(1);
+
+      expect(bounties[0].projectId).to.equal("1");
+      expect(bounties[0].submitter).to.equal(addr1.address);
+      expect(bounties[0].amount).to.equal(bountyAmount);
+    });
 
     it("Should deactivate project and contracts (onlyOwner)", async function () {
       expect(await ProjectRegistry.getProjectCount()).to.equal("1");
