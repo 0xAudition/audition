@@ -74,8 +74,6 @@ describe("Audition ProjectRegistry", function () {
       await expect(ProjectRegistry.registerContract(1, "Vaults", "ipfs://somehash", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F"))
         .to.be.revertedWith('ERC20: insufficient allowance');
 
-      console.log("not here");
-
       await Token.approve(ProjectRegistry.address, approveAmount, {from: owner.address});
 
       await ProjectRegistry.registerContract(1, "Vaults", "ipfs://somehash", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F");
@@ -120,13 +118,28 @@ describe("Audition ProjectRegistry", function () {
       await Token.mint(addr1.address, bountyAmount);
       await Token.connect(addr1).approve(ProjectRegistry.address, bountyAmount);
 
-      await ProjectRegistry.connect(addr1).setBounty(1, 1000);
+      await ProjectRegistry.connect(addr1).setDeposit(1, 1000, 1);
 
-      let bounties = await ProjectRegistry.getBounties(1);
+      let deposit = await ProjectRegistry.getDeposits(1);
 
-      expect(bounties[0].projectId).to.equal("1");
-      expect(bounties[0].submitter).to.equal(addr1.address);
-      expect(bounties[0].amount).to.equal(bountyAmount);
+      expect(deposit[0].projectId).to.equal('1');
+      expect(deposit[0].depositId).to.equal('0');
+      expect(deposit[0].submitter).to.equal(addr1.address);
+      expect(deposit[0].amount).to.equal(bountyAmount);
+      expect(deposit[0].depositType).to.equal(1);
+
+      await Token.mint(addr2.address, bountyAmount);
+      await Token.connect(addr2).approve(ProjectRegistry.address, bountyAmount);
+
+      await ProjectRegistry.connect(addr2).setDeposit(1, 1000, 2);
+
+      deposit = await ProjectRegistry.getDeposits(1);
+
+      expect(deposit[1].projectId).to.equal('1');
+      expect(deposit[1].depositId).to.equal('1');
+      expect(deposit[1].submitter).to.equal(addr2.address);
+      expect(deposit[1].amount).to.equal(bountyAmount);
+      expect(deposit[1].depositType).to.equal(2);
     });
 
     it("Should register claims with given project info", async function () {
@@ -174,6 +187,7 @@ describe("Audition ProjectRegistry", function () {
         .to.be.revertedWith('contract is already deactivated');
 
     });
+
 
   });
 });

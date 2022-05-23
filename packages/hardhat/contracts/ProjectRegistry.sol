@@ -35,14 +35,18 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     bool active;
   }
 
-  struct BountyInfo{
+  struct DepositInfo{
     uint256 projectId;
+    uint256 depositId;
     address submitter;
     uint256 amount;
+    DepositType depositType;
   }
 
+  enum DepositType {DEFAULT, INSURANCE, BOUNTY}
+
   mapping(uint256 => ProjectInfo) public map_id_info;
-  mapping(uint256 => BountyInfo[]) public map_id_bounty;
+  mapping(uint256 => DepositInfo[]) public map_id_deposit;
   uint256 internal projectIdCounter = 0;
 
   event RegisterProject(address indexed _from, uint256 _id, string _name, string _metaData);
@@ -71,7 +75,6 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     projectIdCounter++;
     emit RegisterProject(msg.sender, projectId, _projectName, _metaData);
     emit RegisterContract(msg.sender, projectId, 1, _contractSourceUri, _contractAddress);
-
   }
 
   function registerContract(uint256 _projectId, string memory _contractName, string memory _contractSourceUri, address _contractAddress) public{
@@ -94,17 +97,18 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     map_id_info[_projectId].active = false;
   }
 
-  function setBounty(uint256 _projectId, uint256 _amount) public {
+  function setDeposit(uint256 _projectId, uint256 _amount, DepositType _type) public {
     require(map_id_info[_projectId].active, "project is currently not active");
-    uint256 bountyAmount = _amount * 10 ** decimals();
-    require(audn.balanceOf(msg.sender) >= bountyAmount, "insufficient AUDN balance to set bounty");
-    audn.safeTransferFrom(msg.sender, address(this), bountyAmount);
-    BountyInfo memory bounty = BountyInfo(_projectId, msg.sender, bountyAmount);
-    map_id_bounty[_projectId].push(bounty);
+    uint256 depositAmount = _amount * 10 ** decimals();
+    require(audn.balanceOf(msg.sender) >= depositAmount, "insufficient AUDN balance to set bounty");
+    audn.safeTransferFrom(msg.sender, address(this), depositAmount);
+    map_id_info[_projectId].bountyStatus = true;
+    DepositInfo memory deposit = DepositInfo(_projectId, map_id_deposit[_projectId].length, msg.sender, depositAmount, _type);
+    map_id_deposit[_projectId].push(deposit);
   }
 
-  function getBounties(uint256 _projectId) public view returns(BountyInfo[] memory) {
-    return map_id_bounty[_projectId];
+  function getDeposits(uint256 _projectId) public view returns(DepositInfo[] memory) {
+    return map_id_deposit[_projectId];
   }
 
   function rejectContract(uint256 _projectId, uint256 _contractId) public onlyOwner{
@@ -131,7 +135,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     uint256 count = map_id_info[_projectId].contractCount;
     ContractInfo[] memory contracts = new ContractInfo[](count);
     for(uint i = 1; i <= count; i++) {
-      ContractInfo memory pushContract = map_id_info[_projectId].contracts[i];
+      ContractInfo storage pushContract = map_id_info[_projectId].contracts[i];
       contracts[i-1] = pushContract;
     }
     return contracts;
@@ -152,4 +156,5 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
   function decimals() public view returns (uint256){
     return 18;
   }
+
 }
