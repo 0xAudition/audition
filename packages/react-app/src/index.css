@@ -1,0 +1,49 @@
+
+* {
+  font-family: 'Roboto';
+}
+
+body {
+  width: 100%;
+  height: 100%;  
+}
+
+.ant-btn {
+  width: 180px;
+  font-weight: bold;
+  font-size: 2rem;
+}
+
+.gradient-bg {
+  background-color: #040413;
+  background-image: 
+    radial-gradient(at 20% 80%, #180e24 0, transparent 50%), 
+    radial-gradient(at 0% 40%, #120130 0, transparent 50%),
+    radial-gradient(at 150% 80%, #0f0336 0, transparent 90%),
+    radial-gradient(at 90% 100%, #0fcfe4 0, transparent 90%);
+  background-repeat: no-repeat;
+}
+
+.gradient-nav {
+  background: linear-gradient(to bottom, #040413, #04041348,transparent);
+}
+
+.text-gradient {
+  background: linear-gradient(40deg, #597eb7, rgb(144, 189, 239),#385488);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: moveColor 10s ease-in-out infinite;
+}
+
+.text-gradient-dark {
+  background: linear-gradient(20deg, #ee6b7c, #c3a0ff, #66ace2,#53a1dd,#4feaa9);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-fill-color: transparent;
+  background-size: 300% auto;
+  animation: moveColor 10s ease-in-out infinite;
+}
