@@ -50,12 +50,16 @@ describe("Audition ProjectRegistry", function () {
       expect(await ProjectRegistry.getProjectCount()).to.equal("1");
       expect(await ProjectRegistry.getContractCount(1)).to.equal("1");
 
-      // let projectInfo = await ProjectRegistry.getProjectInfo(1);
+      let projectInfo = await ProjectRegistry.getProjectInfo(1);
       let contractInfo = await ProjectRegistry.getContractInfo(1, 1);
 
-      // expect(projectInfo.projectName).to.equal("TombFork");
-      // expect(projectInfo.metaData).to.equal("tombfork.io");
-      // expect(projectInfo.submitter).to.equal(owner.address);
+      console.log("project info: ", projectInfo);
+      expect(projectInfo[0]).to.equal("TombFork");
+      expect(projectInfo[1]).to.equal("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
+      expect(projectInfo[2]).to.equal('tombfork.io');
+      expect(projectInfo[3]).to.equal(false);
+      expect(projectInfo[4]).to.equal('1');
+      expect(projectInfo[5]).to.equal(true);
 
       expect(contractInfo.projectId).to.equal('1');
       expect(contractInfo.contractId).to.equal('1');

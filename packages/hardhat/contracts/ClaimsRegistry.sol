@@ -102,6 +102,7 @@ contract ClaimsRegistry is ERC721, Ownable {
 
   function getClaims(uint256 _projectId) public view returns(ClaimInfo[] memory) {
     uint256 count = projectId_claimId_map[_projectId].length;
+    require(count > 0, "no claims for this project");
     ClaimInfo[] memory claims = new ClaimInfo[](count);
     for (uint i = 0; i < count; i++) {
       uint256 claimId = projectId_claimId_map[_projectId][i];

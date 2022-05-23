@@ -41,6 +41,8 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     address submitter;
     uint256 amount;
     DepositType depositType;
+    uint256 releasedAmount;
+    bool released;
   }
 
   enum DepositType {DEFAULT, INSURANCE, BOUNTY}
@@ -103,14 +105,14 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     require(audn.balanceOf(msg.sender) >= depositAmount, "insufficient AUDN balance to set bounty");
     audn.safeTransferFrom(msg.sender, address(this), depositAmount);
     map_id_info[_projectId].bountyStatus = true;
-    DepositInfo memory deposit = DepositInfo(_projectId, map_id_deposit[_projectId].length, msg.sender, depositAmount, _type);
+    DepositInfo memory deposit = DepositInfo(_projectId, map_id_deposit[_projectId].length, msg.sender, depositAmount, _type, 0, false);
     map_id_deposit[_projectId].push(deposit);
   }
 
   function getDeposits(uint256 _projectId) public view returns(DepositInfo[] memory) {
     return map_id_deposit[_projectId];
   }
-  
+
   function rejectContract(uint256 _projectId, uint256 _contractId) public onlyOwner{
     require(map_id_info[_projectId].contracts[_contractId].active, "contract is already deactivated");
     map_id_info[_projectId].contracts[_contractId].active = false;
@@ -145,9 +147,9 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     return map_id_info[_projectId].contractCount;
   }
 
-  // function getProjectInfo(uint256 _projectId) public view returns (ProjectInfo memory) {
-  //   return map_id_info[_projectId];
-  // }
+  function getProjectInfo(uint256 _projectId) public view returns (string memory, address, string memory, bool, uint256, bool) {
+    return (map_id_info[_projectId].projectName, map_id_info[_projectId].submitter, map_id_info[_projectId].metaData, map_id_info[_projectId].bountyStatus, map_id_info[_projectId].contractCount, map_id_info[_projectId].active);
+  }
 
   function getProjectCount() public view returns (uint256){
     return projectIdCounter;
