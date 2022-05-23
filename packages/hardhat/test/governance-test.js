@@ -146,6 +146,7 @@ describe("Audition Voting", function () {
                 AudGoverner = await (await ethers.getContractFactory("AudnGovernor")).deploy(AudToken.address);
                 ProjectRegistry = await (await ethers.getContractFactory("ProjectRegistry")).deploy(AudToken.address);
                 ClaimsRegistry = await (await ethers.getContractFactory("ClaimsRegistry")).deploy(AudToken.address);
+                await ClaimsRegistry.setProjectRegistry(ProjectRegistry.address);
                 //...Other contracts
 
 
@@ -163,16 +164,17 @@ describe("Audition Voting", function () {
 
             await AudToken.approve(ProjectRegistry.address, approveAmount, { from: owner.address });
 
-            await ProjectRegistry.registerContract(0, "Vaults", "ipfs://somehash", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F");
-
+            console.log('#1');
+            await ProjectRegistry.registerProject("TombFork", "tombfork.io", "Boardroom", "ipfs://forkboardroom", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F");
+            console.log('#2');
             await AudToken.approve(ClaimsRegistry.address, approveAmount, { from: owner.address });
-
-            await ClaimsRegistry.registerClaim(0, 1, "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F", "Metadata info for claim- could be json data");
+            console.log('#3');
+            await ClaimsRegistry.registerClaim(1, 1, "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F", "Metadata info for claim- could be json data");
 
             console.log('sns - Project & claim done');
 
             // Skipping project approval and going to claim approval
-            let claimId = 0; // from code
+            let claimId = 1; // from code
 
             // console.log('sns-1', await ClaimsRegistry.claimId_info_map(claimId));
             // console.log('sns-2', await ClaimsRegistry.claimId_info_map[claimId]);
@@ -235,7 +237,7 @@ describe("Audition Voting", function () {
         });
 
         it("should execute proposal", async function () {
-            let claimId = 0;
+            let claimId = 1;
             const descriptionHash = ethers.utils.id('Proposal to approve ClaimId: ' + claimId);
 
             let previousTokenCount = await AudToken.balanceOf(addr1.address);

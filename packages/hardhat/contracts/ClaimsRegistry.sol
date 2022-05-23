@@ -5,8 +5,9 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./IProjectRegistry.sol";
+import "./KeeperCompatibleInterface.sol";
 
-contract ClaimsRegistry is ERC721, Ownable {
+contract ClaimsRegistry is ERC721, Ownable, KeeperCompatibleInterface {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
 
@@ -24,12 +25,14 @@ contract ClaimsRegistry is ERC721, Ownable {
     address contractAddress;
     address submitter;
     string metaData;
-    ClaimType claimType;
+    // ClaimType claimType;
     uint256 claimLength;
     uint256 claimStart;
     uint256 depositAmount;
     bool refClaim;
     uint256 refClaimId;
+    uint256 blockNumber;
+    uint256 proposalId;
     bool approved;
   }
 
@@ -62,6 +65,8 @@ contract ClaimsRegistry is ERC721, Ownable {
     claimId_info_map[claimId].contractAddress = _contractAddress;
     claimId_info_map[claimId].submitter = msg.sender;
     claimId_info_map[claimId].metaData = _metaData;
+    claimId_info_map[claimId].blockNumber = block.number;
+
     projectId_claimId_map[_projectId].push(claimId);
     _mint(msg.sender, claimId);
     claimIdCounter++;
@@ -110,5 +115,44 @@ contract ClaimsRegistry is ERC721, Ownable {
       claims[i] = claim;
     }
     return claims;
+  }
+
+  function createProposal(uint256 _claimId) public returns (uint256 proposalId) {
+    return 1;
+  }
+
+  function checkUpkeep(bytes calldata checkData) external view override returns (bool upkeepNeeded, bytes memory performData) {
+    // after claim creation, we can give the creator some time to receieve comments and withdraw.
+    // It might be unnecessary to create a proposal and vote unless its worthy.
+    uint256[] memory pendingClaims = new uint256[](100);
+    uint256 counter = 0;
+    for(uint i = 0; i <= claimIdCounter; i++) {
+      ClaimInfo memory claim = claimId_info_map[i];
+      if(!claim.approved && claim.proposalId == 0 && claim.blockNumber < (block.number - 100)) {
+        // We can create a proposal for this
+        // add claim Id to list
+        pendingClaims[counter++]=claim.claimId;
+      }
+    }
+    if(counter > 0)
+    {
+      uint256[] memory _pendingClaims = new uint256[](counter);
+      for(uint256 i = 0; i< counter; i++) {
+        _pendingClaims[i] = pendingClaims[i];
+      }
+      return (true, abi.encode(_pendingClaims));
+    } else {
+      upkeepNeeded = false;
+    }
+    
+  }
+
+  function performUpkeep(bytes calldata performData) external override {
+    uint256[] memory pendingClaims;
+    (pendingClaims) = abi.decode(performData, (uint256[]));
+    // update claim.proposalId
+    for(uint i =0; i<pendingClaims.length; i++) {
+      createProposal(pendingClaims[i]);
+    }
   }
 }
