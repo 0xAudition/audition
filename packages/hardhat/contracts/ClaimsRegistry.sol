@@ -19,11 +19,12 @@ contract ClaimsRegistry is ERC721, Ownable {
 
   struct ClaimInfo {
     uint256 projectId;
+    uint256 claimId;
     uint256 contractId;
     address contractAddress;
     address submitter;
     string metaData;
-    uint256 claimType;
+    ClaimType claimType;
     uint256 claimLength;
     uint256 claimStart;
     uint256 depositAmount;
@@ -38,11 +39,13 @@ contract ClaimsRegistry is ERC721, Ownable {
     uint256 timeStamp;
   }
 
+  enum ClaimType {DEFAULT, INSURANCE, BOUNTY}
+
   mapping(uint256 => ClaimInfo) public claimId_info_map;
   mapping(uint256 => uint256[]) public projectId_claimId_map;
   uint256 claimIdCounter = 0;
 
-  event RegisterClaim(address _from, uint256 _projectId, uint256 _contractId, address _contractAddress, string _metaData);
+  event RegisterClaim(address _from, uint256 _projectId, uint256 _claimId, string _metaData);
 
   constructor(IERC20 _audn) ERC721(_name, _symbol) {
     audn = _audn;
@@ -54,6 +57,7 @@ contract ClaimsRegistry is ERC721, Ownable {
     audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
     uint256 claimId = claimIdCounter + 1;
     claimId_info_map[claimId].projectId = _projectId;
+    claimId_info_map[claimId].claimId = claimId;
     claimId_info_map[claimId].contractId = _contractId;
     claimId_info_map[claimId].contractAddress = _contractAddress;
     claimId_info_map[claimId].submitter = msg.sender;
@@ -61,7 +65,7 @@ contract ClaimsRegistry is ERC721, Ownable {
     projectId_claimId_map[_projectId].push(claimId);
     _mint(msg.sender, claimId);
     claimIdCounter++;
-    emit RegisterClaim(msg.sender, _projectId, _contractId, _contractAddress, _metaData);
+    emit RegisterClaim(msg.sender, _projectId, claimId, _metaData);
     return claimId;
   }
 
@@ -94,5 +98,16 @@ contract ClaimsRegistry is ERC721, Ownable {
 
   function getClaimIds(uint256 _projectId) public view returns(uint256[] memory) {
     return projectId_claimId_map[_projectId];
+  }
+
+  function getClaims(uint256 _projectId) public view returns(ClaimInfo[] memory) {
+    uint256 count = projectId_claimId_map[_projectId].length;
+    ClaimInfo[] memory claims = new ClaimInfo[](count);
+    for (uint i = 0; i < count; i++) {
+      uint256 claimId = projectId_claimId_map[_projectId][i];
+      ClaimInfo storage claim = claimId_info_map[claimId];
+      claims[i] = claim;
+    }
+    return claims;
   }
 }

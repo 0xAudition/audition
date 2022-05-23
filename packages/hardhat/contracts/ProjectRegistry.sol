@@ -110,7 +110,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
   function getDeposits(uint256 _projectId) public view returns(DepositInfo[] memory) {
     return map_id_deposit[_projectId];
   }
-
+  
   function rejectContract(uint256 _projectId, uint256 _contractId) public onlyOwner{
     require(map_id_info[_projectId].contracts[_contractId].active, "contract is already deactivated");
     map_id_info[_projectId].contracts[_contractId].active = false;

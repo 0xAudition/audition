@@ -158,9 +158,15 @@ describe("Audition ProjectRegistry", function () {
       expect(claim.contractAddress).to.equal('0xBd696eA529180b32e8c67F1888ed51Ac071cb56F');
       expect(claim.metaData).to.equal('some meta data possibly Json');
 
-      let claimIds = await ClaimsRegistry.getClaimIds(1);
+      await Token.approve(ClaimsRegistry.address, approveAmount, {from: owner.address});
 
-      console.log("claim ids: ", claimIds);
+      await ClaimsRegistry.registerClaim(1, 1, '0xF491e7B69E4244ad4002BC14e878a34207E38c29', 'Json meta data');
+
+      expect(await ClaimsRegistry.balanceOf(owner.address)).to.equal('2');
+
+      let claims = await ClaimsRegistry.getClaims(1);
+
+      console.log("claims: ", claims);
     });
 
     it("Should deactivate project and contracts (onlyOwner)", async function () {
