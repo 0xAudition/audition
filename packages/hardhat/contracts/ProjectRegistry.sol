@@ -5,12 +5,13 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./IProjectRegistry.sol";
+import "./IAudnToken.sol";
 
 contract ProjectRegistry is IProjectRegistry, Ownable {
   using SafeMath for uint256;
-  using SafeERC20 for IERC20;
+  using SafeERC20 for IAudnToken;
 
-  IERC20 public audn;
+  IAudnToken public audn;
 
   uint256 requiredAudn = 20 * 10 ** decimals();
 
@@ -41,6 +42,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     address submitter;
     uint256 amount;
     DepositType depositType;
+    uint256 unpaidYield;
     uint256 releasedAmount;
     bool released;
   }
@@ -49,18 +51,25 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
 
   mapping(uint256 => ProjectInfo) public map_id_info;
   mapping(uint256 => DepositInfo[]) public map_id_deposit;
+  mapping(address => uint256) public map_user_deposit;
   uint256 internal projectIdCounter = 0;
+  uint256 feeBalance;  // keep track of fees accrued from registrations
+  uint256 depositBalance; // keep track of total deposit pool
+  uint256 yieldBalance;  // keep track of unpaid yield balance
+  uint256 lastYieldBlock; // last block to mint yield
 
   event RegisterProject(address indexed _from, uint256 _id, string _name, string _metaData);
   event RegisterContract(address indexed _from, uint256 _projectId, uint256 _id, string _contractSourceUri, address _contractAddress);
 
-  constructor(IERC20 _audn) {
+  constructor(IAudnToken _audn) {
     audn = _audn;
+    lastYieldBlock = block.number;
   }
 
   function registerProject(string memory _projectName, string memory _metaData, string memory _contractName, string memory _contractSourceUri, address _contractAddress) public{
     require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
     audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
+    depositBalance += requiredAudn;
     uint256 projectId = projectIdCounter + 1;
     map_id_info[projectId].projectName = _projectName;
     map_id_info[projectId].submitter = msg.sender;
@@ -83,6 +92,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     require(map_id_info[_projectId].active, "invalid project id");
     require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register contract");
     audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
+    depositBalance += requiredAudn;
     uint256 contractId = map_id_info[_projectId].contractCount + 1;
     map_id_info[_projectId].contracts[contractId].projectId = _projectId;
     map_id_info[_projectId].contracts[contractId].contractId = contractId;
@@ -104,8 +114,9 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     uint256 depositAmount = _amount * 10 ** decimals();
     require(audn.balanceOf(msg.sender) >= depositAmount, "insufficient AUDN balance to set bounty");
     audn.safeTransferFrom(msg.sender, address(this), depositAmount);
+    depositBalance += depositAmount;
     map_id_info[_projectId].bountyStatus = true;
-    DepositInfo memory deposit = DepositInfo(_projectId, map_id_deposit[_projectId].length, msg.sender, depositAmount, _type, 0, false);
+    DepositInfo memory deposit = DepositInfo(_projectId, map_id_deposit[_projectId].length, msg.sender, depositAmount, _type, 0, 0, false);
     map_id_deposit[_projectId].push(deposit);
   }
 
@@ -148,7 +159,8 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
   }
 
   function getProjectInfo(uint256 _projectId) public view returns (string memory, address, string memory, bool, uint256, bool) {
-    return (map_id_info[_projectId].projectName, map_id_info[_projectId].submitter, map_id_info[_projectId].metaData, map_id_info[_projectId].bountyStatus, map_id_info[_projectId].contractCount, map_id_info[_projectId].active);
+    return (map_id_info[_projectId].projectName, map_id_info[_projectId].submitter, map_id_info[_projectId].metaData,
+            map_id_info[_projectId].bountyStatus, map_id_info[_projectId].contractCount, map_id_info[_projectId].active);
   }
 
   function getProjectCount() public view returns (uint256){

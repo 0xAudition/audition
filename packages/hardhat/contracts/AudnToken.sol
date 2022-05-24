@@ -5,14 +5,27 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import "./IAudnToken.sol";
 
-contract AudnToken is ERC20, Ownable, ERC20Permit, ERC20Votes {
+contract AudnToken is IAudnToken, ERC20, Ownable, ERC20Permit, ERC20Votes {
+
+    address projectRegistry;
+
+    modifier onlyOwnerOrRegistry {
+      require(msg.sender == owner() || msg.sender == projectRegistry);
+      _;
+    }
+
     constructor() ERC20("Audition Token", "AUDN") ERC20Permit("Audition Token") {
         _mint(msg.sender, 100000 * 10 ** decimals());
     }
 
-    function mint(address to, uint256 amount) public {      // SHOULD BE ONLY OWNER
+    function mint(address to, uint256 amount) public override onlyOwnerOrRegistry{      // SHOULD BE ONLY OWNER
         _mint(to, amount);
+    }
+
+    function setRegistry(address _registry) public onlyOwner {
+      projectRegistry = _registry;
     }
 
     // The following functions are overrides required by Solidity.
