@@ -31,16 +31,16 @@ describe("Audition Voting", function () {
         let addr2;
         let addr3;
         let addrs;
-        let proposalInfo =
+        let proposalInfo;
 
-            it("Should deploy all contracts", async function () {
-                AudToken = await (await ethers.getContractFactory("AudnToken")).deploy();
-                AudGoverner = await (await ethers.getContractFactory("AudnGovernor")).deploy(AudToken.address);
-                //...Other contracts
+        it("Should deploy all contracts", async function () {
+            AudToken = await (await ethers.getContractFactory("AudnToken")).deploy();
+            AudGoverner = await (await ethers.getContractFactory("AudnGovernor")).deploy(AudToken.address);
+            //...Other contracts
 
 
-                [owner, addr1, addr2, addr3, _] = await ethers.getSigners();
-            });
+            [owner, addr1, addr2, addr3, _] = await ethers.getSigners();
+        });
 
         it("Should delegate user vote to self", async function () {
             assert.notEqual((await AudToken.getVotes(owner.address)).toString(), (await AudToken.balanceOf(owner.address)).toString());
@@ -139,7 +139,7 @@ describe("Audition Voting", function () {
         let addr2;
         let addr3;
         let addrs;
-        let proposalInfo =
+        let proposalInfo;
 
             it("Should deploy all contracts", async function () {
                 AudToken = await (await ethers.getContractFactory("AudnToken")).deploy();
@@ -164,20 +164,14 @@ describe("Audition Voting", function () {
 
             await AudToken.approve(ProjectRegistry.address, approveAmount, { from: owner.address });
 
-            console.log('#1');
             await ProjectRegistry.registerProject("TombFork", "tombfork.io", "Boardroom", "ipfs://forkboardroom", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F");
-            console.log('#2');
             await AudToken.approve(ClaimsRegistry.address, approveAmount, { from: owner.address });
-            console.log('#3');
             await ClaimsRegistry.registerClaim(1, 1, "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F", "Metadata info for claim- could be json data");
 
-            console.log('sns - Project & claim done');
 
             // Skipping project approval and going to claim approval
             let claimId = 1; // from code
 
-            // console.log('sns-1', await ClaimsRegistry.claimId_info_map(claimId));
-            // console.log('sns-2', await ClaimsRegistry.claimId_info_map[claimId]);
 
             const grantAmount = 100;
             let claimSubmitter = (await ClaimsRegistry.claimId_info_map(claimId)).submitter;
@@ -195,6 +189,7 @@ describe("Audition Voting", function () {
             const receipt = await tx.wait();
             let proposal = receipt.events.find(e => e.event === 'ProposalCreated').args;
             proposalInfo = proposal;
+            console.log({ proposalInfo });
             // console.log('state', await AudGoverner.state(proposal.proposalId));
 
             assert.equal(await AudGoverner.state(proposal.proposalId), 0);
@@ -271,6 +266,151 @@ describe("Audition Voting", function () {
 
 
         });
+    });
+
+    describe("Full flow using keeper functions", function () {
+        let AudToken;
+        let AudGoverner;
+        let ProjectRegistry;
+        let ClaimsRegistry;
+        let proposalInfo;
+
+        const approveAmount = '20000000000000000000'; //20 AUDN
+
+        let owner;
+        let addr1;
+        let addr2;
+        let addr3;
+        let addrs;
+
+        it("Should deploy all contracts", async function () {
+            AudToken = await (await ethers.getContractFactory("AudnToken")).deploy();
+            AudGoverner = await (await ethers.getContractFactory("AudnGovernor")).deploy(AudToken.address);
+            ProjectRegistry = await (await ethers.getContractFactory("ProjectRegistry")).deploy(AudToken.address);
+            ClaimsRegistry = await (await ethers.getContractFactory("ClaimsRegistry")).deploy(AudToken.address);
+            await ClaimsRegistry.setProjectRegistry(ProjectRegistry.address);
+            await ClaimsRegistry.setGoverner(AudGoverner.address);
+            // await ClaimsRegistry.transferOwnership(AudGoverner.address);
+            //...Other contracts
+
+
+            [owner, addr1, addr2, addr3, _] = await ethers.getSigners();
+        });
+
+        it("Claim contract needs voting power", async function () {
+            assert.notEqual((await AudToken.getVotes(owner.address)).toString(), (await AudToken.balanceOf(owner.address)).toString());
+            await AudToken.delegate(owner.address);
+            assert.equal((await AudToken.getVotes(owner.address)).toString(), (await AudToken.balanceOf(owner.address)).toString());
+        });
+
+
+        it("Submit Project and Claim against it", async function () {
+
+            await AudToken.approve(ProjectRegistry.address, approveAmount, { from: owner.address });
+
+            await ProjectRegistry.registerProject("TombFork", "tombfork.io", "Boardroom", "ipfs://forkboardroom", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F");
+            await AudToken.approve(ClaimsRegistry.address, approveAmount, { from: owner.address });
+            await ClaimsRegistry.registerClaim(1, 1, "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F", "Metadata info for claim- could be json data");
+        });
+
+        it("should create proposal", async function () {
+
+            console.log('proposalThreshold', await AudGoverner.proposalThreshold());
+            // Skipping project approval and going to claim approval
+            let claimId = 1; // from code
+
+            let tx = await ClaimsRegistry.createProposal(claimId);
+            await expect(tx).to.emit(AudGoverner, "ProposalCreated");
+
+            console.log('tx', tx);
+
+
+            const receipt = await tx.wait();
+            //  console.log('##1', receipt);
+            //  console.log('##', receipt.events);
+            //  console.log('##2', await receipt.events[0].getTransactionReceipt());
+
+            let proposalId = (await ClaimsRegistry.claimId_info_map(claimId)).proposalId;
+            console.log('proposalId', proposalId, proposalId.toString());
+            //  let proposal = receipt.events.find(e => e.event === 'ProposalCreated')?.args;
+            proposalInfo = {
+                proposalId,
+                endBlock: await ethers.provider.getBlockNumber() + 45
+            }
+
+            //  assert.equal(await AudGoverner.state(proposal.proposalId), 0);
+        });
+
+        it("should vote on created proposal", async function () {
+            console.log('state', await AudGoverner.state(proposalInfo.proposalId));
+            assert.isFalse(await AudGoverner.hasVoted(proposalInfo.proposalId, owner.address));
+            await AudGoverner.castVote(proposalInfo.proposalId, 1);
+            assert.isTrue(await AudGoverner.hasVoted(proposalInfo.proposalId, owner.address));
+        });
+
+        it("should verify proposal success", async function () {
+            // const x = 10;
+            // const xDays = x * 24 * 60 * 60;
+
+            // await ethers.provider.send('evm_increaseTime', [xDays]);
+
+            // console.log('Current Block', await ethers.provider.getBlockNumber());
+            // console.log('Proposal End Block', proposalInfo.endBlock);
+
+            while (proposalInfo.endBlock >= await ethers.provider.getBlockNumber()) {
+                await ethers.provider.send('evm_mine');
+                // console.log('After mining - Current Block', await ethers.provider.getBlockNumber());
+            }
+
+            // console.log('blockNumber', await ethers.provider.getBlockNumber());
+            assert.isTrue(proposalInfo.endBlock < await ethers.provider.getBlockNumber());
+
+            // console.log('state', await AudGoverner.state(proposalInfo.proposalId));
+            assert.equal(await AudGoverner.state(proposalInfo.proposalId), ProposalState.Succeeded);
+        });
+
+        it("should change Governer contract to Token owner", async function () {
+            await AudToken.transferOwnership(AudGoverner.address);
+            assert.equal(await AudToken.owner(), AudGoverner.address);
+
+            await ClaimsRegistry.transferOwnership(AudGoverner.address);
+            assert.equal(await ClaimsRegistry.owner(), AudGoverner.address);
+        });
+
+        it.skip("should execute proposal", async function () {
+            let claimId = 1;
+            const descriptionHash = ethers.utils.id('Proposal to approve ClaimId: ' + claimId);
+
+            let previousTokenCount = await AudToken.balanceOf(addr1.address);
+            console.log({ previousTokenCount });
+
+            const grantAmount = 100;
+            let claimSubmitter = (await ClaimsRegistry.claimId_info_map(claimId)).submitter;
+            const transferCalldata = AudToken.interface.encodeFunctionData('mint', [claimSubmitter, grantAmount]);
+            const claimApproveCallData = ClaimsRegistry.interface.encodeFunctionData('approveClaim', [claimId]);
+
+            assert.isFalse((await ClaimsRegistry.claimId_info_map(claimId)).approved);
+
+            let tx = await AudGoverner.execute(
+                [AudToken.address, ClaimsRegistry.address],
+                [0, 0],
+                [transferCalldata, claimApproveCallData],
+                descriptionHash
+            );
+
+            const receipt = await tx.wait();
+            let data = receipt.events.find(e => e.event === 'ProposalExecuted').args;
+            console.log(data);
+
+            await expect(tx).to.emit(AudGoverner, "ProposalExecuted");
+            // assert.equal((await AudToken.balanceOf(addr1.address)).toString(), '100');
+
+            assert.isTrue((await ClaimsRegistry.claimId_info_map(claimId)).approved);
+
+
+        });
+
+
     });
 
 
