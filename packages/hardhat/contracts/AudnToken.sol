@@ -24,6 +24,10 @@ contract AudnToken is IAudnToken, ERC20, Ownable, ERC20Permit, ERC20Votes {
         _mint(to, amount);
     }
 
+    function faucet() public {
+        _mint(msg.sender, 100 * 10 ** decimals());
+    }
+
     function setRegistry(address _registry) public onlyOwner {
       projectRegistry = _registry;
     }

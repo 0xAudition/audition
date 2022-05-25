@@ -171,7 +171,7 @@ contract ClaimsRegistry is ERC721, Ownable, KeeperCompatibleInterface {
             bytes memory transferCalldata = abi.encodeWithSignature(
                 "mint(address,uint256)",
                 claim.submitter,
-                100
+                500 * 10 ** 18
             );
             bytes memory claimApproveCalldata = abi.encodeWithSignature(
                 "approveClaim(uint256)",
