@@ -50,6 +50,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
     log: true,
     waitConfirmations: 5,
   });
+  const ClaimsRegistry = await ethers.getContract("ClaimsRegistry", deployer);
 
   await deploy("AudnGovernor", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
@@ -59,6 +60,11 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
     log: true,
     waitConfirmations: 5,
   });
+  const AudnGovernor = await ethers.getContract("AudnGovernor", deployer);
+
+  // Set Ownership and references
+  // await ClaimsRegistry.setProjectRegistry(ProjectRegistry.address);
+  // await ClaimsRegistry.setGoverner(AudnGovernor.address);
 
   /*  await YourContract.setPurpose("Hello");
 
@@ -98,16 +104,50 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
 
   // You can also Verify your contracts with Etherscan here...
   // You don't want to verify on localhost
-  // try {
-  //   if (chainId !== localChainId) {
-  //     await run("verify:verify", {
-  //       address: YourContract.address,
-  //       contract: "contracts/YourContract.sol:YourContract",
-  //       constructorArguments: [],
-  //     });
-  //   }
-  // } catch (error) {
-  //   console.error(error);
-  // }
+  try {
+    if (chainId !== localChainId) {
+      // await run("verify:verify", {
+      //   address: YourContract.address,
+      //   contract: "contracts/YourContract.sol:YourContract",
+      //   constructorArguments: [],
+      // });
+      try {
+        await run("verify:verify", {
+          address: AudnToken.address,
+          contract: "contracts/AudnToken.sol:AudnToken",
+          constructorArguments: [],
+        });
+      } catch { }
+
+      try {
+        await run("verify:verify", {
+          address: ProjectRegistry.address,
+          contract: "contracts/ProjectRegistry.sol:ProjectRegistry",
+          constructorArguments: [audnAddress],
+        });
+      }
+      catch { }
+
+      try {
+        await run("verify:verify", {
+          address: ClaimsRegistry.address,
+          contract: "contracts/ClaimsRegistry.sol:ClaimsRegistry",
+          constructorArguments: [audnAddress],
+        });
+      }
+      catch { }
+
+      try {
+        await run("verify:verify", {
+          address: AudnGovernor.address,
+          contract: "contracts/AudnGovernor.sol:AudnGovernor",
+          constructorArguments: [audnAddress],
+        });
+      }
+      catch { }
+    }
+  } catch (error) {
+    console.error(error);
+  }
 };
 module.exports.tags = ["AudnToken", "AudnGovernor", "ProjectRegistry", "ClaimsRegistry"];
