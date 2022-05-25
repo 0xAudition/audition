@@ -20,7 +20,7 @@ contract AudnToken is IAudnToken, ERC20, Ownable, ERC20Permit, ERC20Votes {
         _mint(msg.sender, 100000 * 10 ** decimals());
     }
 
-    function mint(address to, uint256 amount) public override onlyOwnerOrRegistry{      // SHOULD BE ONLY OWNER
+    function mint(address to, uint256 amount) public override onlyOwnerOrRegistry{  // SHOULD BE ONLY OWNER OR REGISTRY
         _mint(to, amount);
     }
 

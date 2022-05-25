@@ -15,6 +15,10 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
 
   uint256 requiredAudn = 20 * 10 ** decimals();
 
+  uint256 blocksPerDay = 40000;
+
+  uint256 apyDeposit = 20;
+
   struct ProjectInfo{
     string projectName;
     address submitter;
@@ -22,7 +26,9 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     string metaData;
     bool bountyStatus;
     mapping(uint256 => ContractInfo) contracts;
+    // mapping(uint256 => DepositInfo) deposits;
     uint256 contractCount;
+    // uint256 depositCount;
     bool active;
   }
 
@@ -42,7 +48,8 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     address submitter;
     uint256 amount;
     DepositType depositType;
-    uint256 unpaidYield;
+    uint256 startBlock; // deposit start block
+    uint256 unpaidYield; // unpaid accrued rewards (to be transferred when deposit is withdrawn OR claimed against)
     uint256 releasedAmount;
     bool released;
   }
@@ -51,7 +58,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
 
   mapping(uint256 => ProjectInfo) public map_id_info;
   mapping(uint256 => DepositInfo[]) public map_id_deposit;
-  mapping(address => uint256) public map_user_deposit;
+  mapping(address => mapping(uint256 => uint256[])) public map_address_id_depositIds;
   uint256 internal projectIdCounter = 0;
   uint256 feeBalance;  // keep track of fees accrued from registrations
   uint256 depositBalance; // keep track of total deposit pool
@@ -116,7 +123,8 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     audn.safeTransferFrom(msg.sender, address(this), depositAmount);
     depositBalance += depositAmount;
     map_id_info[_projectId].bountyStatus = true;
-    DepositInfo memory deposit = DepositInfo(_projectId, map_id_deposit[_projectId].length, msg.sender, depositAmount, _type, 0, 0, false);
+    map_address_id_depositIds[msg.sender][_projectId].push(map_id_deposit[_projectId].length);
+    DepositInfo memory deposit = DepositInfo(_projectId, map_id_deposit[_projectId].length, msg.sender, depositAmount, _type, block.number, 0, 0, false);
     map_id_deposit[_projectId].push(deposit);
   }
 
@@ -169,6 +177,65 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
 
   function decimals() public view returns (uint256){
     return 18;
+  }
+
+  function withdrawDeposit(DepositInfo memory _deposit) public {
+
+  }
+
+  function getNumDepositsForUser(uint256 _projectId, address _user) public returns (uint256) {
+    uint256 count = map_id_deposit[_projectId].length;
+    require(count > 0, "no deposits for project");
+    uint256 depositCount = 0;
+    for(uint i = 0; i < count; i++) {
+      if (map_id_deposit[_projectId][i].submitter == _user){
+        depositCount++;
+      }
+    }
+    return depositCount;
+  }
+
+  function getDepositIndexesGivenUser(uint256 _projectId, address _user) public returns(uint256[]) {
+    uint256 count = map_id_deposit[_projectId].length;
+    require(count > 0, "no deposits for project");
+    uint256 depositCount = getNumDepositsForUser(_projectId, _user);
+    uint256 indexCounter = 0;
+    uint256[] memory indexes = new uint256[](depositCount);
+    for(uint i = 0; i < count; i++) {
+      if(map_id_deposit[_projectId][i].submitter == _user) {
+        indexes[indexCounter++] = i;
+      }
+    }
+    return indexes;
+  }
+
+  function getDepositsGivenUser(uint256 _projectId, address _user) public returns(DepositInfo[] memory) {
+    uint256 count = map_id_deposit[_projectId].length;
+    require(count > 0, "no deposits for project");
+    uint256 counter;
+    DepositInfo[] memory deposits = new DepositInfo[](map_address_id_depositIds[_user][_projectId].length);
+    for(uint i = 0; i < count; i++) {
+      if(map_id_deposit[_projectId][i].submitter == _user) {
+        DepositInfo storage deposit = map_id_deposit[_projectId][i];
+        deposits[counter++] = deposit;
+      }
+    }
+    return deposits;
+  }
+
+  function getDepositGivenIdAndUser(uint256 _projectId, uint256 _depositId, address _user) public returns(DepositInfo memory) {
+    uint256 depositCount = getNumDepositsForUser(_projectId, _user);
+
+  }
+
+  function calculateYieldGivenDeposit(DepositInfo memory _deposit) public view returns(uint256) {
+    uint256 depositTime = block.number - deposit.startBlock;
+    if(depositTime < blocksPerDay) {
+      return 0;
+    } else {
+      uint256 depositDays = depositTime.div(blocksPerDay);
+      return deposit.amount.div(100).mul(apyDeposit).div(365).mul(depositDays);
+    }
   }
 
 }
