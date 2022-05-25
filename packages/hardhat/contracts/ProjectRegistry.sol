@@ -141,10 +141,15 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     requiredAudn = _value;
   }
 
-  function verifyContract(uint256 _projectId, uint256 _contractId) external view override returns(bool) {
-      require(map_id_info[_projectId].active, "project is invalid");
-      require(map_id_info[_projectId].contracts[_contractId].active, "contract is invalid");
-      return true;
+  function verifyContract(uint256 _projectId, uint256 _contractId) public view override returns(bool) {
+    require(map_id_info[_projectId].active, "project is invalid");
+    require(map_id_info[_projectId].contracts[_contractId].active, "contract is invalid");
+    return true;
+  }
+
+  function verifyProject(uint256 _projectId) public view returns(bool) {
+    require(map_id_info[_projectId].active, "project is invalid");
+    return true;
   }
 
   function getContractInfo(uint256 _projectId, uint256 _contractId) public view returns (ContractInfo memory) {
@@ -183,33 +188,21 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
 
   }
 
-  function getNumDepositsForUser(uint256 _projectId, address _user) public returns (uint256) {
-    uint256 count = map_id_deposit[_projectId].length;
-    require(count > 0, "no deposits for project");
-    uint256 depositCount = 0;
-    for(uint i = 0; i < count; i++) {
-      if (map_id_deposit[_projectId][i].submitter == _user){
-        depositCount++;
-      }
-    }
-    return depositCount;
+  function getNumDepositsForUser(uint256 _projectId, address _user) public view returns (uint256) {
+    return map_address_id_depositIds[_user][_projectId].length;
   }
 
-  function getDepositIndexesGivenUser(uint256 _projectId, address _user) public returns(uint256[]) {
-    uint256 count = map_id_deposit[_projectId].length;
-    require(count > 0, "no deposits for project");
-    uint256 depositCount = getNumDepositsForUser(_projectId, _user);
-    uint256 indexCounter = 0;
-    uint256[] memory indexes = new uint256[](depositCount);
+  function getDepositIndexesGivenUser(uint256 _projectId, address _user) public view returns(uint256[] memory) {
+    uint256 count = map_address_id_depositIds[_user][_projectId].length;
+    uint256[] memory indexes = new uint256[](count);
     for(uint i = 0; i < count; i++) {
-      if(map_id_deposit[_projectId][i].submitter == _user) {
-        indexes[indexCounter++] = i;
-      }
+      indexes[i] = map_address_id_depositIds[_user][_projectId][i];
     }
+
     return indexes;
   }
 
-  function getDepositsGivenUser(uint256 _projectId, address _user) public returns(DepositInfo[] memory) {
+  function getDepositsGivenUser(uint256 _projectId, address _user) public view returns(DepositInfo[] memory) {
     uint256 count = map_id_deposit[_projectId].length;
     require(count > 0, "no deposits for project");
     uint256 counter;
@@ -223,12 +216,26 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     return deposits;
   }
 
-  function getDepositGivenIdAndUser(uint256 _projectId, uint256 _depositId, address _user) public returns(DepositInfo memory) {
-    uint256 depositCount = getNumDepositsForUser(_projectId, _user);
-
+  function verifyDepositGivenIdAndUser(uint256 _projectId, uint256 _depositId, address _user) public view returns(bool) {
+    require(verifyProject(_projectId));
+    bool flag;
+    uint256 count = map_address_id_depositIds[_user][_projectId].length;
+    for(uint i = 0; i < count && !flag; i++) {
+      if(map_address_id_depositIds[_user][_projectId][i] == _depositId) {
+        flag = true;
+      }
+    }
+    return flag;
   }
 
-  function calculateYieldGivenDeposit(DepositInfo memory _deposit) public view returns(uint256) {
+  function getDepositGivenIdAndUser(uint256 _projectId, uint256 _depositId, address _user) public view returns(DepositInfo memory) {
+    require(verifyDepositGivenIdAndUser(_projectId, _depositId, _user));
+    DepositInfo memory deposit = map_id_deposit[_projectId][_depositId];
+    return deposit;
+  }
+
+  function calculateYieldGivenDeposit(uint256 _projectId, uint256 _depositId, address _user) public view returns(uint256) {
+    DepositInfo memory deposit = getDepositGivenIdAndUser(_projectId, _depositId, _user);
     uint256 depositTime = block.number - deposit.startBlock;
     if(depositTime < blocksPerDay) {
       return 0;

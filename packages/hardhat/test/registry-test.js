@@ -175,6 +175,48 @@ describe("Audition ProjectRegistry", function () {
       console.log("claims: ", claims);
     });
 
+    it("calculating deposit yields", async function () {
+      let depositYield = ethers.BigNumber.from(bountyAmount).div(100).mul(20);
+      let oneDayYield = depositYield.div(365);
+      console.log("deposit yield one day: ", oneDayYield.toString());
+      console.log("deposit yield one year: ", depositYield.toString());
+
+      console.log("deposit yield one day token amount : ", ethers.utils.formatUnits(oneDayYield.toString()));
+
+      let deposit = await ProjectRegistry.getDeposits(1);
+
+      expect(deposit[0].projectId).to.equal('1');
+      expect(deposit[0].depositId).to.equal('0');
+      expect(deposit[0].submitter).to.equal(addr1.address);
+      expect(deposit[0].amount).to.equal(bountyAmount);
+      expect(deposit[0].depositType).to.equal(1);
+
+      // let flag = await ProjectRegistry.verifyProject(1);
+      // let flag = await ProjectRegistry.verifyDepositGivenIdAndUser(5, 1, addr1.address);
+      // console.log("flag :", flag);
+      //
+      // deposit = await ProjectRegistry.getDepositGivenIdAndUser(1, 0, addr1.address);
+      //
+      // console.log("deposit givenid and user :", deposit);
+      // let startBlock = deposit[0].startBlock;
+      // console.log("startBlock :", startBlock.toString());
+      //
+      console.log("block before forward: ", await ethers.provider.getBlockNumber());
+      for (let index = 0; index < 40000; index++) {
+        await ethers.provider.send('evm_mine');
+      }
+
+      console.log("block after forward", await ethers.provider.getBlockNumber());
+
+      let currentYield = await ProjectRegistry.calculateYieldGivenDeposit(1, 0, addr1.address);
+      console.log('current yield', currentYield.toString());
+
+      expect(currentYield).to.equal(oneDayYield);
+
+      console.log("yieldGivenDeposit: ", depositYield.toString());
+
+    });
+
     it("Should deactivate project and contracts (onlyOwner)", async function () {
       expect(await ProjectRegistry.getProjectCount()).to.equal("1");
 
@@ -200,36 +242,6 @@ describe("Audition ProjectRegistry", function () {
 
     });
 
-    it("calculating deposit yields", async function () {
-      let depositYield = ethers.BigNumber.from(bountyAmount).div(100).mul(20);
-      let oneDayYield = depositYield.div(365);
-      console.log("deposit yield one day: ", oneDayYield.toString());
-      console.log("deposit yield one year: ", depositYield.toString());
 
-      console.log("deposit yield one day token amount : ", ethers.utils.formatUnits(oneDayYield.toString()));
-
-      let deposit = await ProjectRegistry.getDeposits(1);
-
-      expect(deposit[0].projectId).to.equal('1');
-      expect(deposit[0].depositId).to.equal('0');
-      expect(deposit[0].submitter).to.equal(addr1.address);
-      expect(deposit[0].amount).to.equal(bountyAmount);
-      expect(deposit[0].depositType).to.equal(1);
-
-      let startBlock = deposit[0].startBlock;
-      console.log("startBlock :", startBlock.toString());
-
-      console.log("block before forward: ", await ethers.provider.getBlockNumber());
-      for (let index = 0; index < 40000; index++) {
-        await ethers.provider.send('evm_mine');
-      }
-
-      console.log("block after forward", await ethers.provider.getBlockNumber());
-
-      depositYield = await ProjectRegistry.calculateYieldGivenDeposit(1);
-
-      console.log("yieldGivenDeposit: ", depositYield.toString());
-
-    });
   });
 });
