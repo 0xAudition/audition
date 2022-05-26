@@ -200,21 +200,50 @@ describe("Audition ProjectRegistry", function () {
       // console.log("deposit givenid and user :", deposit);
       // let startBlock = deposit[0].startBlock;
       // console.log("startBlock :", startBlock.toString());
+
+      // console.log("block before forward: ", await ethers.provider.getBlockNumber());
+      // for (let index = 0; index < 40000; index++) {
+      //   await ethers.provider.send('evm_mine');
+      // }
       //
-      console.log("block before forward: ", await ethers.provider.getBlockNumber());
-      for (let index = 0; index < 40000; index++) {
-        await ethers.provider.send('evm_mine');
-      }
+      // console.log("block after forward", await ethers.provider.getBlockNumber());
+      //
+      // let currentYield = await ProjectRegistry.calculateYieldGivenDeposit(1, 0, addr1.address);
+      // console.log('current yield', currentYield.toString());
+      //
+      // expect(currentYield).to.equal(oneDayYield);
+      //
+      // console.log("yieldGivenDeposit: ", currentYield.toString());
 
-      console.log("block after forward", await ethers.provider.getBlockNumber());
+    });
 
-      let currentYield = await ProjectRegistry.calculateYieldGivenDeposit(1, 0, addr1.address);
-      console.log('current yield', currentYield.toString());
+    it("Users should claim bounty from released deposit", async function () {
+      await ProjectRegistry.setClaims(ClaimsRegistry.address);
+      await Token.setRegistry(ProjectRegistry.address);
 
-      expect(currentYield).to.equal(oneDayYield);
+      await ProjectRegistry.connect(addr2).releaseDeposit(1, 1, 1);
 
-      console.log("yieldGivenDeposit: ", depositYield.toString());
+      deposit = await ProjectRegistry.getDepositGivenIdAndUser(1, 1, addr2.address);
 
+      console.log("deposit released amount : ", ethers.utils.formatUnits(deposit.releasedAmount.toString()));
+
+      let balanceBeforeClaim = await Token.balanceOf(owner.address);
+      let contractBalance = await ProjectRegistry.getDepositBalance();
+      let contractRealBalance = await Token.balanceOf(ProjectRegistry.address);
+
+      console.log("user balance before collecting claim : ", ethers.utils.formatUnits(balanceBeforeClaim.toString()));
+      console.log("contract deposit balance before collecting claim : ", ethers.utils.formatUnits(contractBalance.toString()));
+      console.log("contract real balance before collecting claim : ", ethers.utils.formatUnits(contractRealBalance.toString()));
+
+      await ProjectRegistry.collectClaim(1, 1, 1);
+
+      let balanceAfterClaim = await Token.balanceOf(owner.address);
+      contractBalance = await ProjectRegistry.getDepositBalance();
+      contractRealBalance = await Token.balanceOf(ProjectRegistry.address);
+
+      console.log("user balance after collecting claim : ", ethers.utils.formatUnits(balanceAfterClaim.toString()));
+      console.log("contract deposit balance after collecting claim : ", ethers.utils.formatUnits(contractBalance.toString()));
+      console.log("contract real balance after collecting claim : ", ethers.utils.formatUnits(contractRealBalance.toString()));
     });
 
     it("Should deactivate project and contracts (onlyOwner)", async function () {

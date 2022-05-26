@@ -2,6 +2,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./IProjectRegistry.sol";
@@ -12,6 +13,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
   using SafeERC20 for IAudnToken;
 
   IAudnToken public audn;
+  IERC721 public claims;
 
   uint256 requiredAudn = 20 * 10 ** decimals();
 
@@ -49,8 +51,9 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     uint256 amount;
     DepositType depositType;
     uint256 startBlock; // deposit start block
-    uint256 unpaidYield; // unpaid accrued rewards (to be transferred when deposit is withdrawn OR claimed against)
     uint256 releasedAmount;
+    uint256 claimedAmount;
+    uint256 releasedTo;
     bool released;
   }
 
@@ -76,7 +79,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
   function registerProject(string memory _projectName, string memory _metaData, string memory _contractName, string memory _contractSourceUri, address _contractAddress) public{
     require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
     audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
-    depositBalance += requiredAudn;
+    feeBalance += requiredAudn;
     uint256 projectId = projectIdCounter + 1;
     map_id_info[projectId].projectName = _projectName;
     map_id_info[projectId].submitter = msg.sender;
@@ -99,7 +102,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     require(map_id_info[_projectId].active, "invalid project id");
     require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register contract");
     audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
-    depositBalance += requiredAudn;
+    feeBalance += requiredAudn;
     uint256 contractId = map_id_info[_projectId].contractCount + 1;
     map_id_info[_projectId].contracts[contractId].projectId = _projectId;
     map_id_info[_projectId].contracts[contractId].contractId = contractId;
@@ -124,7 +127,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     depositBalance += depositAmount;
     map_id_info[_projectId].bountyStatus = true;
     map_address_id_depositIds[msg.sender][_projectId].push(map_id_deposit[_projectId].length);
-    DepositInfo memory deposit = DepositInfo(_projectId, map_id_deposit[_projectId].length, msg.sender, depositAmount, _type, block.number, 0, 0, false);
+    DepositInfo memory deposit = DepositInfo(_projectId, map_id_deposit[_projectId].length, msg.sender, depositAmount, _type, block.number, 0, 0, 0, false);
     map_id_deposit[_projectId].push(deposit);
   }
 
@@ -180,6 +183,10 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     return projectIdCounter;
   }
 
+  function setClaims(IERC721 _claims) public{
+    claims = _claims;
+  }
+
   function decimals() public view returns (uint256){
     return 18;
   }
@@ -217,9 +224,10 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
   }
 
   function verifyDepositGivenIdAndUser(uint256 _projectId, uint256 _depositId, address _user) public view returns(bool) {
-    require(verifyProject(_projectId));
+    require(verifyProject(_projectId), "invalid project");
     bool flag;
     uint256 count = map_address_id_depositIds[_user][_projectId].length;
+    require(count > 0, "no deposits found for user");
     for(uint i = 0; i < count && !flag; i++) {
       if(map_address_id_depositIds[_user][_projectId][i] == _depositId) {
         flag = true;
@@ -243,6 +251,33 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
       uint256 depositDays = depositTime.div(blocksPerDay);
       return deposit.amount.div(100).mul(apyDeposit).div(365).mul(depositDays);
     }
+  }
+
+  function releaseDeposit(uint256 _projectId, uint256 _depositId, uint256 _claimId) public {
+    uint256 yieldAmount = calculateYieldGivenDeposit(_projectId, _depositId, msg.sender);
+    require(map_id_deposit[_projectId][_depositId].released == false, "deposit is already released");
+    address claimOwner = claims.ownerOf(_claimId);
+    if(yieldAmount > 0) {
+      audn.mint(msg.sender, yieldAmount);
+    }
+    map_id_deposit[_projectId][_depositId].released = true;
+    map_id_deposit[_projectId][_depositId].releasedTo = _claimId;
+    map_id_deposit[_projectId][_depositId].releasedAmount = map_id_deposit[_projectId][_depositId].amount;
+  }
+
+  function collectClaim(uint256 _projectId, uint256 _depositId, uint256 _claimId) public {
+    address claimOwner = claims.ownerOf(_claimId);
+    require(claimOwner == msg.sender, "you do not own the claim");
+    require(map_id_deposit[_projectId][_depositId].released, "claim is not released");
+    require(map_id_deposit[_projectId][_depositId].releasedTo == _claimId, "invalid claimer");
+    require(map_id_deposit[_projectId][_depositId].claimedAmount == 0, "deposit was already claimed");
+    audn.safeTransfer(msg.sender, map_id_deposit[_projectId][_depositId].releasedAmount);
+    depositBalance -= map_id_deposit[_projectId][_depositId].releasedAmount;
+    map_id_deposit[_projectId][_depositId].claimedAmount = map_id_deposit[_projectId][_depositId].releasedAmount;
+  }
+
+  function getDepositBalance() public view returns (uint256) {
+    return depositBalance;
   }
 
 }
