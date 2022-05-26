@@ -1,4 +1,5 @@
-import { Button, Col, Menu, Row } from "antd";
+/* eslint-disable prettier/prettier */
+import { Button, Col, Row } from "antd";
 import "antd/dist/antd.css";
 import {
   useBalance,
@@ -10,7 +11,7 @@ import {
 } from "eth-hooks";
 import { useExchangeEthPrice } from "eth-hooks/dapps/dex";
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, Route, Switch, useLocation } from "react-router-dom";
+import { Route, Switch, useLocation } from "react-router-dom";
 import "./App.css";
 import {
   Account,
@@ -29,8 +30,9 @@ import externalContracts from "./contracts/external_contracts";
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
-import { Home, ExampleUI, Hints, Subgraph } from "./views";
+import { Home, ExampleUI, Subgraph, Projects } from "./views";
 import { useStaticJsonRPC } from "./hooks";
+import RegisterProject from "./components/RegisterProject";
 
 const { ethers } = require("ethers");
 /*
@@ -247,7 +249,37 @@ function App(props) {
   return (
     <div className="App">
       {/* ✏️ Edit the header and change the title to your project name */}
-      <Header />
+      <Header>
+        {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
+        <div style={{ position: "relative", display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", flex: 1 }}>
+            {USE_NETWORK_SELECTOR && (
+              <div style={{ marginRight: 20 }}>
+                <NetworkSwitch
+                  networkOptions={networkOptions}
+                  selectedNetwork={selectedNetwork}
+                  setSelectedNetwork={setSelectedNetwork}
+                />
+              </div>
+            )}
+            <Account
+              useBurner={USE_BURNER_WALLET}
+              address={address}
+              localProvider={localProvider}
+              userSigner={userSigner}
+              mainnetProvider={mainnetProvider}
+              price={price}
+              web3Modal={web3Modal}
+              loadWeb3Modal={loadWeb3Modal}
+              logoutOfWeb3Modal={logoutOfWeb3Modal}
+              blockExplorer={blockExplorer}
+            />
+          </div>
+        </div>
+      </Header>
+      {yourLocalBalance.lte(ethers.BigNumber.from("0")) && (
+        <FaucetHint localProvider={localProvider} targetNetwork={targetNetwork} address={address} />
+      )}
       <NetworkDisplay
         NETWORKCHECK={NETWORKCHECK}
         localChainId={localChainId}
@@ -256,7 +288,7 @@ function App(props) {
         logoutOfWeb3Modal={logoutOfWeb3Modal}
         USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
       />
-      <Menu style={{ textAlign: "center", marginTop: 40 }} selectedKeys={[location.pathname]} mode="horizontal">
+      {/* <Menu style={{ textAlign: "center", marginTop: 20 }} selectedKeys={[location.pathname]} mode="horizontal">
         <Menu.Item key="/">
           <Link to="/">App Home</Link>
         </Menu.Item>
@@ -275,7 +307,7 @@ function App(props) {
         <Menu.Item key="/subgraph">
           <Link to="/subgraph">Subgraph</Link>
         </Menu.Item>
-      </Menu>
+      </Menu> */}
 
       <Switch>
         <Route exact path="/">
@@ -299,13 +331,11 @@ function App(props) {
             contractConfig={contractConfig}
           />
         </Route>
-        <Route path="/hints">
-          <Hints
-            address={address}
-            yourLocalBalance={yourLocalBalance}
-            mainnetProvider={mainnetProvider}
-            price={price}
-          />
+        <Route path="/projects">
+          <Projects />
+        </Route>
+        <Route path="/projects/registerproject">
+          <RegisterProject />
         </Route>
         <Route path="/exampleui">
           <ExampleUI
@@ -355,39 +385,9 @@ function App(props) {
 
       <ThemeSwitch />
 
-      {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
-      <div style={{ position: "fixed", textAlign: "right", right: 0, top: 0, padding: 10 }}>
-        <div style={{ display: "flex", flex: 1, alignItems: "center" }}>
-          {USE_NETWORK_SELECTOR && (
-            <div style={{ marginRight: 20 }}>
-              <NetworkSwitch
-                networkOptions={networkOptions}
-                selectedNetwork={selectedNetwork}
-                setSelectedNetwork={setSelectedNetwork}
-              />
-            </div>
-          )}
-          <Account
-            useBurner={USE_BURNER_WALLET}
-            address={address}
-            localProvider={localProvider}
-            userSigner={userSigner}
-            mainnetProvider={mainnetProvider}
-            price={price}
-            web3Modal={web3Modal}
-            loadWeb3Modal={loadWeb3Modal}
-            logoutOfWeb3Modal={logoutOfWeb3Modal}
-            blockExplorer={blockExplorer}
-          />
-        </div>
-        {yourLocalBalance.lte(ethers.BigNumber.from("0")) && (
-          <FaucetHint localProvider={localProvider} targetNetwork={targetNetwork} address={address} />
-        )}
-      </div>
-
       {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}
       <div style={{ position: "fixed", textAlign: "left", left: 0, bottom: 20, padding: 10 }}>
-        <Row align="middle" gutter={[4, 4]}>
+        {/* <Row align="middle" gutter={[4, 4]}>
           <Col span={8}>
             <Ramp price={price} address={address} networks={NETWORKS} />
           </Col>
@@ -409,7 +409,7 @@ function App(props) {
               Support
             </Button>
           </Col>
-        </Row>
+        </Row> */}
 
         <Row align="middle" gutter={[4, 4]}>
           <Col span={24}>

@@ -4,6 +4,7 @@ import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { BrowserRouter } from "react-router-dom";
 import ReactDOM from "react-dom";
 import App from "./App";
+import { StyledEngineProvider } from "@mui/material";
 import "./index.css";
 
 const themes = {
@@ -21,12 +22,14 @@ const client = new ApolloClient({
 });
 
 ReactDOM.render(
-  <ApolloProvider client={client}>
-    <ThemeSwitcherProvider themeMap={themes} defaultTheme={prevTheme || "light"}>
-      <BrowserRouter>
-        <App subgraphUri={subgraphUri} />
-      </BrowserRouter>
-    </ThemeSwitcherProvider>
-  </ApolloProvider>,
+  <StyledEngineProvider injectFirst>
+    <ApolloProvider client={client}>
+      <ThemeSwitcherProvider themeMap={themes} defaultTheme={prevTheme || "light"}>
+        <BrowserRouter>
+          <App subgraphUri={subgraphUri} />
+        </BrowserRouter>
+      </ThemeSwitcherProvider>
+    </ApolloProvider>
+  </StyledEngineProvider>,
   document.getElementById("root"),
 );
