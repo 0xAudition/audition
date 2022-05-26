@@ -19,6 +19,10 @@ import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import "./CollapsibleTable.css";
 import CreateClaims from "./CreateClaims";
 import RegisterContract from "./RegisterContract";
+import {
+  useContractReader,
+} from "eth-hooks";
+
 
 function createData(sort, name, expand, funds) {
   return {
@@ -58,6 +62,17 @@ function createData(sort, name, expand, funds) {
   };
 }
 
+function ProjectRow(props) {
+  const id = props.id;
+  const projectInfo = useContractReader(props.props.props.readContracts, "ProjectRegistry", "getProjectInfo", [id]);
+  if (!projectInfo) return null;
+  const row = createData(id, projectInfo[0], true, 50001);
+  row.projectInfo = projectInfo;
+  row.id = id;
+
+  return (<Row key={id} row={row} />);
+}
+
 function Row(props) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
@@ -66,9 +81,9 @@ function Row(props) {
     <React.Fragment>
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
         <TableCell component="th" scope="row" align="center">
-          {row.sort}
+          {row.id}
         </TableCell>
-        <TableCell align="left">{row.name}</TableCell>
+        <TableCell align="left">{row.projectInfo ? row.projectInfo[0] : '...'}</TableCell>
         <TableCell align="center">
           <IconButton
             aria-label="expand row"
@@ -165,11 +180,11 @@ Row.propTypes = {
   row: PropTypes.shape({
     sort: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
-    fund: PropTypes.number.isRequired,
+    funds: PropTypes.number.isRequired,
     history: PropTypes.arrayOf(
       PropTypes.shape({
         claim: PropTypes.string.isRequired,
-        insuranceDeposit: PropTypes.string.isRequired,
+        //insuranceDeposit: PropTypes.string.isRequired,
         insuranceClaim: PropTypes.string.isRequired,
       })
     ).isRequired,
@@ -184,7 +199,10 @@ const rows = [
 ];
 
 // this is where the actual table heading and the entire structure get set
-export default function CollapsibleTable() {
+export default function CollapsibleTable(props) {
+  if (!props.projectCount) return null;
+  const projectIds = [...Array(props.projectCount.toNumber())].map((_, i) => i + 1); // array of projectIds from 1
+
   return (
     <TableContainer component={Paper}>
       <Table aria-label="collapsible table">
@@ -197,8 +215,8 @@ export default function CollapsibleTable() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <Row key={row.name} row={row} />
+          {projectIds.map((id) => (
+            <ProjectRow key={id} id={id} props={props} />
           ))}
         </TableBody>
       </Table>
