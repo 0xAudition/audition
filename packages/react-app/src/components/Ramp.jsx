@@ -53,7 +53,7 @@ export default function Ramp(props) {
 
   return (
     <div>
-      <Button
+      {/* <Button
         size="large"
         shape="round"
         onClick={() => {
@@ -145,7 +145,7 @@ export default function Ramp(props) {
         <h2>Testnet ETH</h2>
 
         {allFaucets}
-      </Modal>
+      </Modal> */}
     </div>
   );
 }

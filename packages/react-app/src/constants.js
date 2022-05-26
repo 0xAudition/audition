@@ -177,7 +177,7 @@ export const NETWORKS = {
     color: "#53CBC9",
     chainId: 1284,
     blockExplorer: "https://moonscan.io",
-    rpcUrl: "https://rpc.api.moonbeam.network", 
+    rpcUrl: "https://rpc.api.moonbeam.network",
   },
   moonriver: {
     name: "moonriver",
@@ -200,7 +200,15 @@ export const NETWORKS = {
     chainId: 1281,
     blockExplorer: "https://moonbeam-explorer.netlify.app/",
     rpcUrl: "http://127.0.0.1:9933",
-  }
+  },
+  godwoken: {
+    name: "godwoken",
+    color: "#000000",
+    chainId: 71401,
+    blockExplorer: "https://gw-explorer.nervosdao.community/",
+    rpcUrl: "https://godwoken-testnet-v1.ckbapp.dev",
+    faucet: "https://testnet.bridge.godwoken.io",
+  },
 };
 
 export const NETWORK = chainId => {

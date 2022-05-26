@@ -117,7 +117,7 @@
 }
 @keyframes waveEffect {
   to {
-    box-shadow: 0 0 0 #1890ff;
+    box-shadow: 0 0 0 #144d81;
     box-shadow: 0 0 0 6px var(--antd-wave-shadow-color);
   }
 }
@@ -690,7 +690,7 @@ body {
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   font-variant: tabular-nums;
   line-height: 1.5715;
-  background-color: #fff;
+  background-color: #e9edf4;
   font-feature-settings: "tnum";
 }
 [tabindex="-1"]:focus {
