@@ -20,11 +20,35 @@ const style = {
 };
 
 export default function FormModalRegister(props) {
-  const [address, setAddress] = useState("");
+  // const [address, setAddress] = useState("");
 
-  const checkDigitCount = (e) => {
+  const [projectName, setProjectName] = useState("");
+  const [projectDesc, setProjectDesc] = useState("");
+  const [contractAddress, setContractAddress] = useState("");
+  const [contractVerified, setContractVerified] = useState(false);
+  const [contractName, setContractName] = useState("");
+
+
+  const checkDigitCount = async (e) => {
     e.preventDefault();
-    setAddress(e.target.value);
+    setContractAddress(e.target.value);
+    let addr = e.target.value;
+    console.log({addr});
+    if(addr && addr.length == 42) {
+      // get contract details
+      let url = `https://api-rinkeby.etherscan.io/api?module=contract&action=getsourcecode&address=${addr}&apikey=BC8WVS441425IDXZI1ZUDGT7XTCQAUYJGW`;
+      
+      let response = await fetch(url, {
+        crossDomain:true,
+      });
+      let contractInfo =  await response.json();
+      if(contractInfo.status == '1') {
+        setContractVerified(true);
+        if(contractInfo.result && contractInfo.result.length > 0) {
+          setContractName(contractInfo.result[0].ContractName);
+        }
+      }
+    }
   };
 
   return (
@@ -43,6 +67,9 @@ export default function FormModalRegister(props) {
             label={"Project Name"}
             type="text"
             variant="outlined"
+            onChange={e => {
+              setProjectName(e.target.value);
+            }}
           />
           <TextField
             id="outlined-description-input"
@@ -50,15 +77,18 @@ export default function FormModalRegister(props) {
             label="Project Description"
             type="text"
             variant="outlined"
+            onChange={e => {
+              setProjectDesc(e.target.value);
+            }}
           />
-          {address.length > 25 ? (
+          {contractAddress.length > 25 ? (
             <TextField
               id="outlined-contractAddress-input"
               className="w-3/4"
               label="Contract Address"
               type="text"
               variant="outlined"
-              value={address}
+              value={contractAddress}
               onChange={checkDigitCount}
             />
           ) : (
@@ -68,16 +98,28 @@ export default function FormModalRegister(props) {
               id="outlined-contractAddress-input"
               className="w-3/4"
               label="Contract Address"
-              value={address}
+              value={contractAddress}
               onChange={checkDigitCount}
             />
           )}
           {/* read only section - THIS NEEDS CONNECTION TO THE NAME OF THE CONTRACT & CONTRACT SOURCE */}
+
+          <TextField
+            id="contractName-verified"
+            label="Contract Verified"
+            className="w-3/4"
+            value={contractVerified}
+            InputProps={{
+              readOnly: true,
+            }}
+            variant="standard"
+          />
+
           <TextField
             id="contractName-read-only-input"
             label="Contract Name"
             className="w-3/4"
-            value={"Name of the contract"}
+            value={contractName}
             InputProps={{
               readOnly: true,
             }}
@@ -93,7 +135,13 @@ export default function FormModalRegister(props) {
             }}
             variant="standard"
           />
-          <Button variant="outlined">Register</Button>
+          <Button variant="outlined"
+            onClick= { async () => {
+              await props.writeContracts.ProjectRegistry.registerProject(projectName, projectDesc, contractName, '', contractAddress);
+              // Show transaction submitted message if success...
+              props.handleClose();
+            }}
+          >Register</Button>
         </Box>
       </Modal>
     </>

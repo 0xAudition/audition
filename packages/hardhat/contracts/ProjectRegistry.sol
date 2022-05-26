@@ -77,8 +77,8 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
   }
 
   function registerProject(string memory _projectName, string memory _metaData, string memory _contractName, string memory _contractSourceUri, address _contractAddress) public{
-    require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
-    audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
+    // require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
+    // audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
     feeBalance += requiredAudn;
     uint256 projectId = projectIdCounter + 1;
     map_id_info[projectId].projectName = _projectName;

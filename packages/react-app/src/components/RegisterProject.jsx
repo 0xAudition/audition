@@ -13,6 +13,7 @@ export default function RegisterProject({
   readContracts,
   writeContracts,
 }) {
+
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
