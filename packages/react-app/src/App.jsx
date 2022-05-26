@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Button, Col, Row } from "antd";
 import "antd/dist/antd.css";
 import {
@@ -29,8 +30,9 @@ import externalContracts from "./contracts/external_contracts";
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
-import { Home, ExampleUI, Hints, Subgraph } from "./views";
+import { Home, ExampleUI, Subgraph, Projects } from "./views";
 import { useStaticJsonRPC } from "./hooks";
+import RegisterProject from "./components/RegisterProject";
 
 const { ethers } = require("ethers");
 /*
@@ -329,13 +331,11 @@ function App(props) {
             contractConfig={contractConfig}
           />
         </Route>
-        <Route path="/hints">
-          <Hints
-            address={address}
-            yourLocalBalance={yourLocalBalance}
-            mainnetProvider={mainnetProvider}
-            price={price}
-          />
+        <Route path="/projects">
+          <Projects />
+        </Route>
+        <Route path="/projects/registerproject">
+          <RegisterProject />
         </Route>
         <Route path="/exampleui">
           <ExampleUI

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Modal, Button, Box, TextField } from "@mui/material";
 import { useState } from "react";
 
@@ -21,7 +22,7 @@ const style = {
 export default function FormModalRegister(props) {
   const [address, setAddress] = useState("");
 
-  const checkDigitCount = e => {
+  const checkDigitCount = (e) => {
     e.preventDefault();
     setAddress(e.target.value);
   };
@@ -71,13 +72,6 @@ export default function FormModalRegister(props) {
               onChange={checkDigitCount}
             />
           )}
-          <TextField
-            id="outlined-projectName-input"
-            className="w-3/4"
-            label="Project Name"
-            type="text"
-            variant="outlined"
-          />
           {/* read only section - THIS NEEDS CONNECTION TO THE NAME OF THE CONTRACT & CONTRACT SOURCE */}
           <TextField
             id="contractName-read-only-input"

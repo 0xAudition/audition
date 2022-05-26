@@ -1,18 +1,29 @@
+/* eslint-disable prettier/prettier */
 import { useState } from "react";
 import { Button } from "@mui/material";
 import FormModalClaims from "./FormModalClaims";
 
-export default function CreateClaims() {
+export default function CreateClaims(props) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
+  // eslint-disable-next-line prettier/prettier
   const handleClose = () => setOpen(false);
 
   return (
     <>
-      <Button className="bg-blue-500 text-white hover:bg-blue-400" onClick={handleOpen}>
+      <Button
+        className="bg-blue-500 text-white hover:bg-blue-400 w-24"
+        onClick={handleOpen}
+      >
         Claims
       </Button>
-      <FormModalClaims open={open} handleClose={handleClose} createClaims={true} name="Submit" />
+      <FormModalClaims
+        open={open}
+        handleClose={handleClose}
+        createClaims={true}
+        name="Submit"
+        contractInfo={props.contractRef.row.registerContract}
+      />
     </>
   );
 }

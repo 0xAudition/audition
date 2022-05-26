@@ -29,7 +29,7 @@ body {
 }
 
 .text-gradient {
-  background: linear-gradient(40deg, #597eb7, rgb(144, 189, 239),#385488);
+  background: linear-gradient(40deg, #7958b4, rgb(47, 70, 218),#385488);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

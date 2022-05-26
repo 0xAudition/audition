@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Spin, Switch } from "antd";
 import React, { useState } from "react";
 import { utils } from "ethers";

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import * as React from "react";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
@@ -17,6 +18,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import "./CollapsibleTable.css";
 import CreateClaims from "./CreateClaims";
+import RegisterContract from "./RegisterContract";
 
 function createData(sort, name, expand, funds) {
   return {
@@ -42,6 +44,17 @@ function createData(sort, name, expand, funds) {
         insuranceClaim: `${200} AUDN from ${0xddf500}`,
       },
     ],
+    // NEEDS TO BE LINKED TO THE CONTRACT DETAILS FROM THE REGISTER CONTRACT FORM
+    registerContract: [
+      {
+        address: `${"0x7822000sdfadadkgjadlkjadal"}`,
+        name: `${"ERC20"}`,
+      },
+      {
+        address: `${"0x78399000sdfadadkgjadlkjadal"}`,
+        name: `${"ERC"}`,
+      },
+    ],
   };
 }
 
@@ -57,16 +70,52 @@ function Row(props) {
         </TableCell>
         <TableCell align="left">{row.name}</TableCell>
         <TableCell align="center">
-          <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)} className="w-8">
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+            className="w-8"
+          >
             {open ? <RemoveCircleOutlineIcon /> : <AddCircleOutlineIcon />}
           </IconButton>
         </TableCell>
         <TableCell align="left">{row.funds} AUDN</TableCell>
       </TableRow>
       <TableRow>
-        {/* this is where the collapsible transaction history data are structured */}
+        {/* this is where the collapsible contract registry data are structured */}
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
+              <Typography variant="h6" gutterBottom component="div">
+                Contracts
+              </Typography>
+              <Table size="small" aria-label="purchases">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Reference No.</TableCell>
+                    <TableCell>Address</TableCell>
+                    <TableCell>Name</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {row.registerContract.map((contractRow) => (
+                    <TableRow key={contractRow.address}>
+                      <TableCell component="th" scope="row">
+                        {/* Contract Register Reference number PLEASE CHANGE AS YOU REQUIRE */}
+                        {contractRow.address.slice(0, 5)}-{contractRow.name}
+                      </TableCell>
+                      <TableCell component="th" scope="row">
+                        {contractRow.address}
+                      </TableCell>
+                      <TableCell>{contractRow.name}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <RegisterContract />
+            </Box>
+
+            {/* this is where the collapsible transaction history data are structured */}
             <Box sx={{ margin: 1 }}>
               <Typography variant="h6" gutterBottom component="div">
                 Transaction History
@@ -80,7 +129,7 @@ function Row(props) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.history.map(historyRow => (
+                  {row.history.map((historyRow) => (
                     <TableRow key={historyRow.claim}>
                       <TableCell component="th" scope="row">
                         {historyRow.claim}
@@ -90,15 +139,18 @@ function Row(props) {
                         <br></br>
                         {historyRow.insuranceDeposit[1]}
                       </TableCell>
-                      <TableCell align="left">{historyRow.insuranceClaim}</TableCell>
+                      <TableCell align="left">
+                        {historyRow.insuranceClaim}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
               <Container className="flex h-20 gap-4 justify-end items-center ctaButtons">
-                <Button className="bg-blue-500 text-white hover:bg-blue-400">Deposit</Button>
-                <CreateClaims />
-                <Button className="bg-blue-500 text-white hover:bg-blue-400 w-60">Register Contract</Button>
+                <Button className="bg-blue-500 text-white hover:bg-blue-400 w-24">
+                  Deposit
+                </Button>
+                <CreateClaims contractRef={props} />
               </Container>
             </Box>
           </Collapse>
@@ -119,7 +171,7 @@ Row.propTypes = {
         claim: PropTypes.string.isRequired,
         insuranceDeposit: PropTypes.string.isRequired,
         insuranceClaim: PropTypes.string.isRequired,
-      }),
+      })
     ).isRequired,
   }).isRequired,
 };
@@ -145,7 +197,7 @@ export default function CollapsibleTable() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map(row => (
+          {rows.map((row) => (
             <Row key={row.name} row={row} />
           ))}
         </TableBody>

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Button } from "@mui/material";
 import { useState } from "react";
 import FormModalRegister from "./FormModalRegister";
@@ -9,10 +10,18 @@ export default function RegisterProject() {
 
   return (
     <>
-      <Button variant="contained" className="bg-blue-500 text-white hover:bg-blue-400 my-20" onClick={handleOpen}>
+      <Button
+        variant="contained"
+        className="bg-blue-500 text-white hover:bg-blue-400 my-20"
+        onClick={handleOpen}
+      >
         Register A Project
       </Button>
-      <FormModalRegister open={open} handleClose={handleClose} registerProject={true} />
+      <FormModalRegister
+        open={open}
+        handleClose={handleClose}
+        registerProject={true}
+      />
     </>
   );
 }

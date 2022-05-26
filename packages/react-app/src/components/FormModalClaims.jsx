@@ -1,4 +1,14 @@
-import { Modal, Button, Box, TextField, FormControl, MenuItem, Select, InputLabel } from "@mui/material";
+/* eslint-disable prettier/prettier */
+import {
+  Modal,
+  Button,
+  Box,
+  TextField,
+  FormControl,
+  MenuItem,
+  Select,
+  InputLabel,
+} from "@mui/material";
 import { useState } from "react";
 
 const style = {
@@ -22,12 +32,12 @@ export default function FormModalClaims(props) {
   const [claimerAddress, setClaimerAddress] = useState("");
   const [selectContract, setSelectContract] = useState("");
 
-  const checkClaimerAddressDigitCount = e => {
+  const checkClaimerAddressDigitCount = (e) => {
     e.preventDefault();
     setClaimerAddress(e.target.value);
   };
 
-  const handleSelectChange = e => {
+  const handleSelectChange = (e) => {
     setSelectContract(e.target.value);
   };
 
@@ -90,16 +100,26 @@ export default function FormModalClaims(props) {
           />
           {/* Contract address dropdown selection here - NEED TO CONNECT TO EXISTING CONTRACT ADDRESSES TO SEE THE OPTIONS */}
           <FormControl className="w-3/4">
-            <InputLabel id="demo-simple-select-label">Contract Address</InputLabel>
+            <InputLabel id="demo-simple-select-label">
+              Contract Address
+            </InputLabel>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              label="Contract Address - select"
+              label="Contract Reference - select"
               onChange={handleSelectChange}
             >
-              <MenuItem value={"sdfadfadgadkzzxdassdadfzdf14654"}>{"sdfadfadgadkzzxdassdadfzdf14654"}</MenuItem>
-              <MenuItem>{selectContract}</MenuItem>
-              <MenuItem>{selectContract}</MenuItem>
+              <MenuItem value={props.contractInfo[0].address}>
+                {/* THIS LINKS TO THE CONTRACT REF NUMBER. THIS NEEDS REFACTORING & PROPER LINKING */}
+                {props.contractInfo[0].address.slice(0, 5) +
+                  "-" +
+                  props.contractInfo[0].name}
+              </MenuItem>
+              <MenuItem value={props.contractInfo[1].address}>
+                {props.contractInfo[1].address.slice(0, 5) +
+                  "-" +
+                  props.contractInfo[1].name}
+              </MenuItem>
             </Select>
           </FormControl>
 
