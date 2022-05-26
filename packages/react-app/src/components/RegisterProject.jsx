@@ -3,7 +3,16 @@ import { Button } from "@mui/material";
 import { useState } from "react";
 import FormModalRegister from "./FormModalRegister";
 
-export default function RegisterProject() {
+export default function RegisterProject({
+  address,
+  mainnetProvider,
+  localProvider,
+  yourLocalBalance,
+  price,
+  tx,
+  readContracts,
+  writeContracts,
+}) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);

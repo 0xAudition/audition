@@ -5,7 +5,16 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import FormModalRegister from "../components/FormModalRegister";
 
-function Home(props) {
+export default function Home({
+  address,
+  mainnetProvider,
+  localProvider,
+  yourLocalBalance,
+  price,
+  tx,
+  readContracts,
+  writeContracts,
+}) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -57,6 +66,14 @@ function Home(props) {
           open={open}
           handleClose={handleClose}
           registerProject={true}
+          address={address}
+            mainnetProvider={mainnetProvider}
+            localProvider={localProvider}
+            yourLocalBalance={yourLocalBalance}
+            price={price}
+            tx={tx}
+            writeContracts={writeContracts}
+            readContracts={readContracts}
         />
         <Link to="/projects">
             <Button variant="contained" className="bg-blue-500">Find Bounties</Button>
@@ -66,5 +83,3 @@ function Home(props) {
     </>
   );
 }
-
-export default Home;

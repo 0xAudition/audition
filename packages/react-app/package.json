@@ -86,7 +86,7 @@
       "plugin:prettier/recommended"
     ],
     "rules": {
-      "prettier/prettier": "warn"
+      "prettier/prettier": 0
     }
   },
   "scripts": {
