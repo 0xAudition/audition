@@ -1,7 +1,9 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
 import Collapse from "@mui/material/Collapse";
+import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -13,6 +15,8 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import "./CollapsibleTable.css";
+import CreateClaims from "./CreateClaims";
 
 function createData(sort, name, expand, funds) {
   return {
@@ -22,20 +26,20 @@ function createData(sort, name, expand, funds) {
     funds,
     history: [
       {
-        claim: "A Bug in 0x12345",
+        claim: `A Bug in ${0x12345}`,
         insuranceDeposit: [
-          `${500} AUDN from 0x12345578`,
+          `${500} AUDN from ${0x12345578}`,
           `Description: Project DAO ensures up to ${500} AUDN in the case of ...`,
         ],
-        insuranceClaim: `${200} AUDN from 0x7890`,
+        insuranceClaim: `${200} AUDN from ${0x7890}`,
       },
       {
-        claim: "A Bug in 0x78911",
+        claim: `A Bug in ${0x78911}`,
         insuranceDeposit: [
-          `${400} AUDN from 0x1234aaddb`,
+          `${400} AUDN from ${0x1234aaddb}`,
           `Description: Project DAO ensures up to ${400} AUDN in the case of ...`,
         ],
-        insuranceClaim: `${200} AUDN from 0xdfkjs`,
+        insuranceClaim: `${200} AUDN from ${0xddf500}`,
       },
     ],
   };
@@ -91,6 +95,11 @@ function Row(props) {
                   ))}
                 </TableBody>
               </Table>
+              <Container className="flex h-20 gap-4 justify-end items-center ctaButtons">
+                <Button className="bg-blue-500 text-white hover:bg-blue-400">Deposit</Button>
+                <CreateClaims />
+                <Button className="bg-blue-500 text-white hover:bg-blue-400 w-60">Register Contract</Button>
+              </Container>
             </Box>
           </Collapse>
         </TableCell>

@@ -1,11 +1,11 @@
 import { AppBar, Toolbar, Typography, Container } from "@mui/material";
-import React from "react";
 import CollapsibleTable from "../components/CollapsibleTable";
+import RegisterProject from "../components/RegisterProject";
 
 function Home(props) {
   return (
     <>
-      <AppBar className="shadow-none gradient-bg py-4 z-0">
+      <AppBar className="shadow-none gradient-bg py-4 z-10">
         <Toolbar>
           <Typography
             variant="h4"
@@ -31,6 +31,7 @@ function Home(props) {
           Projects
         </Typography>
         <CollapsibleTable className="mb-20 shadow-md" />
+        <RegisterProject />
       </Container>
     </>
   );

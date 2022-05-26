@@ -92,7 +92,7 @@ export default function Account({
           style={{ marginLeft: 8, position: "fixed", right: "24px" }}
           shape="round"
           onClick={accountButtonInfo.action}
-          className="z-10 mt-3"
+          className="z-20 mt-3"
         >
           {accountButtonInfo.name}
         </Button>
