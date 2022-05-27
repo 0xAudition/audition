@@ -31,6 +31,8 @@ export default function RegisterProject({
         open={open}
         handleClose={handleClose}
         registerProject={true}
+        tx={tx}
+        writeContracts={writeContracts}
       />
     </>
   );

@@ -39,7 +39,7 @@ function Projects(props) {
           Projects
         </Typography>
         <CollapsibleTable props={props} projectCount={projectCount} className="mb-20 shadow-md" />
-        <RegisterProject props={props}/>
+        <RegisterProject {...props}/>
       </Container>
     </>
   );

@@ -1,6 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { Modal, Button, Box, TextField } from "@mui/material";
 import { useState } from "react";
+import {
+  useContractReader,
+} from "eth-hooks";
+
 
 const style = {
   position: "absolute",
@@ -106,7 +110,7 @@ export default function FormModalRegister(props) {
 
           <TextField
             id="contractName-verified"
-            label="Contract Verified"
+            label="Contract Validated"
             className="w-3/4"
             value={contractVerified}
             InputProps={{
@@ -136,12 +140,35 @@ export default function FormModalRegister(props) {
             variant="standard"
           />
           <Button variant="outlined"
-            onClick= { async () => {
-              await props.writeContracts.ProjectRegistry.registerProject(projectName, projectDesc, contractName, '', contractAddress);
-              // Show transaction submitted message if success...
-              props.handleClose();
+            style={{ marginTop: 8 }}
+            onClick={async () => {
+              /* look how you call setPurpose on your contract: */
+              /* notice how you pass a call back for tx updates too */
+              // ProjectRegistry.registerProject("TombFork", "tombfork.io", "Boardroom", "ipfs://forkboardroom", "0xBd696eA529180b32e8c67F1888ed51Ac071cb56F");
+              // TODO Contract Source
+              console.log(props)
+              const result = props.tx(props.writeContracts.ProjectRegistry.registerProject(projectName, projectDesc, contractName, '', contractAddress), update => {
+                console.log("📡 Transaction Update:", update);
+                if (update && (update.status === "confirmed" || update.status === 1)) {
+                  console.log(" 🍾 Transaction " + update.hash + " finished!");
+                  console.log(
+                    " ⛽️ " +
+                      update.gasUsed +
+                      "/" +
+                      (update.gasLimit || update.gas) +
+                      " @ " +
+                      parseFloat(update.gasPrice) / 1000000000 +
+                      " gwei",
+                  );
+                }
+              });
+              console.log("awaiting metamask/web3 confirm result...", result);
+              console.log(await result);
             }}
-          >Register</Button>
+          >
+            Register Project!
+          </Button>
+
         </Box>
       </Modal>
     </>
