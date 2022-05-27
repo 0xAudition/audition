@@ -2,8 +2,14 @@
 import { AppBar, Toolbar, Typography, Container } from "@mui/material";
 import CollapsibleTable from "../components/CollapsibleTable";
 import RegisterProject from "../components/RegisterProject";
+import {
+  useContractReader,
+} from "eth-hooks";
+
 
 function Projects(props) {
+  const projectCount = useContractReader(props.readContracts, "ProjectRegistry", "getProjectCount");
+
   return (
     <>
       <AppBar className="shadow-none gradient-bg py-4 z-10">
@@ -27,12 +33,13 @@ function Projects(props) {
         </Toolbar>
       </AppBar>
       {/* collapsible table section */}
+      <h2>debug: {projectCount ? projectCount.toString() : '...'} projects live</h2>
       <Container maxWidth="md" className="h-[100vh] mt-48">
         <Typography variant="h3" className="font-bold text-gradient mb-8 project">
           Projects
         </Typography>
-        <CollapsibleTable className="mb-20 shadow-md" />
-        <RegisterProject  props={props}/>
+        <CollapsibleTable props={props} projectCount={projectCount} className="mb-20 shadow-md" />
+        <RegisterProject props={props}/>
       </Container>
     </>
   );
