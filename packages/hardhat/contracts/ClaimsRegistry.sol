@@ -73,11 +73,11 @@ contract ClaimsRegistry is ERC721, Ownable, KeeperCompatibleInterface {
         string memory _metaData
     ) public returns (uint256) {
         require(projectRegistry.verifyContract(_projectId, _contractId));
-        require(
-            audn.balanceOf(msg.sender) >= requiredAudn,
-            "insufficient AUDN balance to register claim"
-        );
-        audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
+        // require(
+        //     audn.balanceOf(msg.sender) >= requiredAudn,
+        //     "insufficient AUDN balance to register claim"
+        // );
+        // audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
         uint256 claimId = claimIdCounter + 1;
         claimId_info_map[claimId].projectId = _projectId;
         claimId_info_map[claimId].claimId = claimId;

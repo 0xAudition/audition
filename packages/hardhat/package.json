@@ -43,6 +43,7 @@
     "send": "hardhat send",
     "generate": "hardhat generate",
     "account": "hardhat account",
-    "verify": "hardhat verify"
+    "verify": "hardhat verify",
+    "generate-data": "node scripts/data-generation.js"
   }
 }
