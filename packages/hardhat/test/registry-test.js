@@ -124,7 +124,7 @@ describe("Audition ProjectRegistry", function () {
       await Token.mint(addr1.address, bountyAmount);
       await Token.connect(addr1).approve(ProjectRegistry.address, bountyAmount);
 
-      await ProjectRegistry.connect(addr1).setDeposit(1, 1000, 1);
+      await ProjectRegistry.connect(addr1).setDeposit(1, 1000, 1, 5);
 
       let deposit = await ProjectRegistry.getDeposits(1);
 
@@ -137,7 +137,7 @@ describe("Audition ProjectRegistry", function () {
       await Token.mint(addr2.address, bountyAmount);
       await Token.connect(addr2).approve(ProjectRegistry.address, bountyAmount);
 
-      await ProjectRegistry.connect(addr2).setDeposit(1, 1000, 2);
+      await ProjectRegistry.connect(addr2).setDeposit(1, 1000, 2, 1);
 
       deposit = await ProjectRegistry.getDeposits(1);
 
@@ -218,7 +218,7 @@ describe("Audition ProjectRegistry", function () {
     });
 
     it("Users should claim bounty from released deposit", async function () {
-      await ProjectRegistry.setClaims(ClaimsRegistry.address);
+      await ProjectRegistry.setClaimsRegistry(ClaimsRegistry.address);
       await Token.setRegistry(ProjectRegistry.address);
 
       await ProjectRegistry.connect(addr2).releaseDeposit(1, 1, 1);
