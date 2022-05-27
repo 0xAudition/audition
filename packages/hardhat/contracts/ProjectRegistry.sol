@@ -131,6 +131,11 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     map_id_deposit[_projectId].push(deposit);
   }
 
+  // function setInsuranceDeposit(uint256 _projectId, uint256 _amount, uint256 _maxPremium) public {
+  //   require(map_id_info[_projectId].active, "project is currently not active");
+  //   uint256 depositAmount = _amount * 10 ** decimals();
+  // }
+
   function getDeposits(uint256 _projectId) public view returns(DepositInfo[] memory) {
     return map_id_deposit[_projectId];
   }
@@ -278,6 +283,16 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
 
   function getDepositBalance() public view returns (uint256) {
     return depositBalance;
+  }
+
+  function getTotalDepositsGivenId(uint256 _projectId) public view returns (uint256){
+    verifyProject(_projectId);
+    uint256 count = map_id_deposit[_projectId].length;
+    uint256 total = 0;
+    for(uint i = 0; i < count; i++) {
+      total += map_id_deposit[_projectId][i].amount;
+    }
+    return total;
   }
 
 }
