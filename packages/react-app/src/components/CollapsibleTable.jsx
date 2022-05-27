@@ -22,6 +22,7 @@ import RegisterContract from "./RegisterContract";
 import {
   useContractReader,
 } from "eth-hooks";
+const { ethers } = require("ethers");
 
 
 function createData(sort, name, expand, funds) {
@@ -65,9 +66,15 @@ function createData(sort, name, expand, funds) {
 function ProjectRow(props) {
   const id = props.id;
   const projectInfo = useContractReader(props.props.props.readContracts, "ProjectRegistry", "getProjectInfo", [id]);
+  const projectClaims = useContractReader(props.props.props.readContracts, "ClaimsRegistry", "getClaims", [id]);
+  const projectDeposits = useContractReader(props.props.props.readContracts, "ProjectRegistry", "getDeposits", [id]);
+  console.log(projectClaims);
+  console.log(projectDeposits);
   if (!projectInfo) return null;
   const row = createData(id, projectInfo[0], true, 50001);
   row.projectInfo = projectInfo;
+  row.projectClaims = projectClaims ? projectClaims : [];
+  row.projectDeposits = projectDeposits ? projectDeposits : [];
   row.id = id;
 
   return (<Row key={id} row={row} />);
@@ -133,8 +140,32 @@ function Row(props) {
             {/* this is where the collapsible transaction history data are structured */}
             <Box sx={{ margin: 1 }}>
               <Typography variant="h6" gutterBottom component="div">
-                Transaction History
+                Transaction History - Deposits &amp; Claims
               </Typography>
+              <Table size="small" aria-label="purchases">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Deposit ID</TableCell>
+                    <TableCell>Amount</TableCell>
+                    <TableCell>Claimed</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {row.projectDeposits.map((deposit) => (
+                    <TableRow key={deposit.depositId}>
+                      <TableCell component="th" scope="row">
+                        {deposit.depositId.toString()}
+                      </TableCell>
+                      <TableCell>
+                        {ethers.utils.formatEther(deposit.amount)}
+                      </TableCell>
+                      <TableCell align="left">
+                        {ethers.utils.formatEther(deposit.claimedAmount)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
               <Table size="small" aria-label="purchases">
                 <TableHead>
                   <TableRow>
@@ -144,6 +175,20 @@ function Row(props) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
+                  {row.projectClaims.map((claim) => (
+                    <TableRow key={claim.claimId}>
+                      <TableCell component="th" scope="row">
+                        Claim[{claim.claimId.toString()}]<br/>
+                        Contract#{claim.contractId.toString()}
+                      </TableCell>
+                      <TableCell>
+                        {claim.metaData}
+                      </TableCell>
+                      <TableCell align="left">
+                        {claim.depositAmount.toString()} AUDN
+                      </TableCell>
+                    </TableRow>
+                  ))}
                   {row.history.map((historyRow) => (
                     <TableRow key={historyRow.claim}>
                       <TableCell component="th" scope="row">
