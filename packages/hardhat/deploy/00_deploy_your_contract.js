@@ -63,8 +63,8 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   const AudnGovernor = await ethers.getContract("AudnGovernor", deployer);
 
   // Set Ownership and references
-  // await ClaimsRegistry.setProjectRegistry(ProjectRegistry.address);
-  // await ClaimsRegistry.setGoverner(AudnGovernor.address);
+  await ClaimsRegistry.setProjectRegistry(ProjectRegistry.address);
+  await ClaimsRegistry.setGoverner(AudnGovernor.address);
 
   /*  await YourContract.setPurpose("Hello");
 

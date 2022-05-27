@@ -4,6 +4,7 @@ import { useState } from "react";
 import FormModalRegister from "./FormModalRegister";
 
 export default function RegisterProject({
+  props,
   address,
   mainnetProvider,
   localProvider,
@@ -31,6 +32,7 @@ export default function RegisterProject({
         open={open}
         handleClose={handleClose}
         registerProject={true}
+          {...props}
       />
     </>
   );
