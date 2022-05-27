@@ -18,6 +18,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import "./CollapsibleTable.css";
 import CreateClaims from "./CreateClaims";
+import CreateDeposit from "./CreateDeposit";
 import RegisterContract from "./RegisterContract";
 import {
   useContractReader,
@@ -198,9 +199,7 @@ function Row(props) {
                 </TableBody>
               </Table>
               <Container className="flex h-20 gap-4 justify-end items-center ctaButtons">
-                <Button className="bg-blue-500 text-white hover:bg-blue-400 w-24">
-                  Deposit
-                </Button>
+                <CreateDeposit rowProps={props} />
               </Container>
               <Table size="small" aria-label="purchases">
                 <TableHead>
@@ -278,7 +277,7 @@ const rows = [
 
 // this is where the actual table heading and the entire structure get set
 export default function CollapsibleTable(props) {
-  if (!props.projectCount) return null;
+  if (!props.projectCount || props.projectCount.toNumber() == 0) return null;
   const projectIds = [...Array(props.projectCount.toNumber())].map((_, i) => i + 1); // array of projectIds from 1
 
   return (
