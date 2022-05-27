@@ -66,13 +66,13 @@ function createData(sort, name, expand, funds) {
 function ProjectRow(props) {
   const id = props.id;
   const projectInfo = useContractReader(props.props.props.readContracts, "ProjectRegistry", "getProjectInfo", [id]);
+  const projectContracts = useContractReader(props.props.props.readContracts, "ProjectRegistry", "getContractsFromProject", [id]);
   const projectClaims = useContractReader(props.props.props.readContracts, "ClaimsRegistry", "getClaims", [id]);
   const projectDeposits = useContractReader(props.props.props.readContracts, "ProjectRegistry", "getDeposits", [id]);
-  console.log(projectClaims);
-  console.log(projectDeposits);
   if (!projectInfo) return null;
   const row = createData(id, projectInfo[0], true, 50001);
   row.projectInfo = projectInfo;
+  row.projectContracts = projectContracts ? projectContracts : [];
   row.projectClaims = projectClaims ? projectClaims : [];
   row.projectDeposits = projectDeposits ? projectDeposits : [];
   row.id = id;
@@ -120,16 +120,41 @@ function Row(props) {
               <Table size="small" aria-label="purchases">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Reference No.</TableCell>
+                    <TableCell>No.</TableCell>
                     <TableCell>Address</TableCell>
                     <TableCell>Name</TableCell>
+                    <TableCell>Source</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.registerContract.map((contractRow) => (
+                  {
+                    /*
+                      struct ContractInfo{
+                        uint256 projectId;
+                        uint256 contractId;
+                        string contractName;
+                        string contractSourceUri;
+                        address contractAddr;
+                        bool bountyStatus;
+                        bool active;
+                      }
+                    */
+                   row.projectContracts.map((contractRow) => (
                     <TableRow key={contractRow.address}>
                       <TableCell component="th" scope="row">
-                        {/* Contract Register Reference number PLEASE CHANGE AS YOU REQUIRE */}
+                        {contractRow.contractId.toString()}
+                      </TableCell>
+                      <TableCell component="th" scope="row">
+                        {contractRow.contractAddr}
+                      </TableCell>
+                      <TableCell>{contractRow.contractName}</TableCell>
+                      <TableCell><a href={contractRow.contractSourceUri}>Link</a></TableCell>
+                    </TableRow>
+                  ))}
+
+                  {/*row.registerContract.map((contractRow) => (
+                    <TableRow key={contractRow.address}>
+                      <TableCell component="th" scope="row">
                         {contractRow.address.slice(0, 5)}-{contractRow.name}
                       </TableCell>
                       <TableCell component="th" scope="row">
@@ -137,7 +162,7 @@ function Row(props) {
                       </TableCell>
                       <TableCell>{contractRow.name}</TableCell>
                     </TableRow>
-                  ))}
+                  ))*/}
                 </TableBody>
               </Table>
               <RegisterContract />
