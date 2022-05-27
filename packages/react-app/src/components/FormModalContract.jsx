@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Modal, Box, TextField, Button } from "@mui/material";
 import { useState } from "react";
+const { ethers } = require("ethers");
 
 const style = {
   position: "absolute",
@@ -20,8 +21,10 @@ const style = {
 };
 
 export default function FormModalContract(props) {
+  console.log(props);
   const [contractAddress, setContractAddress] = useState("");
   const [name, setName] = useState("");
+  const [sourceUri, setSourceUri] = useState("");
 
   const checkContractAddressDigit = (e) => {
     e.preventDefault();
@@ -31,6 +34,11 @@ export default function FormModalContract(props) {
   const handleName = (e) => {
     e.preventDefault();
     setName(e.target.value);
+  };
+
+  const handleSourceUri = (e) => {
+    e.preventDefault();
+    setSourceUri(e.target.value);
   };
 
   const handleSubmit = (e) => {
@@ -63,6 +71,7 @@ export default function FormModalContract(props) {
               className="w-3/4"
               label="Contract Address"
               value={contractAddress}
+              placeholder={'0x426892cd1aA9228357bE4BB232918E146482806F'}
               onChange={checkContractAddressDigit}
             />
           )}
@@ -74,8 +83,65 @@ export default function FormModalContract(props) {
             variant="outlined"
             onChange={handleName}
           />
-          {/* THE BUTTON NEEDS TO BE CONNECTED TO THE "CONTRACTS" TABLE UNDER "PROJECTS". REFER TO "RegisterContract.jsx" under COMPONENTS */}
-          <Button onClick={handleSubmit}>Submit</Button>
+          <TextField
+            className="w-3/4"
+            label="Source URI"
+            type="text"
+            value={sourceUri}
+            variant="outlined"
+            onChange={handleSourceUri}
+          />
+          <Button variant="outlined"
+            style={{ marginTop: 8 }}
+            onClick={async () => {
+              const result = props.props.txtra.tx(props.props.txtra.writeContracts.AudnToken.approve(props.props.txtra.writeContracts.ProjectRegistry.address, ethers.utils.parseEther('20')), update => {
+                console.log("📡 Transaction Update:", update);
+                if (update && (update.status === "confirmed" || update.status === 1)) {
+                  console.log(" 🍾 Transaction " + update.hash + " finished!");
+                  console.log(
+                    " ⛽️ " +
+                      update.gasUsed +
+                      "/" +
+                      (update.gasLimit || update.gas) +
+                      " @ " +
+                      parseFloat(update.gasPrice) / 1000000000 +
+                      " gwei",
+                  );
+                }
+              });
+              console.log("awaiting metamask/web3 confirm result...", result);
+              console.log(await result);
+            }}
+          >
+            Approve 20 AUDN
+          </Button>
+          <Button variant="outlined"
+            style={{ marginTop: 8 }}
+            onClick={async () => {
+              // function registerContract(uint256 _projectId, string memory _contractName, string memory _contractSourceUri, address _contractAddress)
+              const projectId = props.props.row.id;
+              const result = props.props.txtra.tx(props.props.txtra.writeContracts.ProjectRegistry.registerContract(projectId, name, sourceUri, contractAddress), update => {
+                console.log("📡 Transaction Update:", update);
+                if (update && (update.status === "confirmed" || update.status === 1)) {
+                  console.log(" 🍾 Transaction " + update.hash + " finished!");
+                  console.log(
+                    " ⛽️ " +
+                      update.gasUsed +
+                      "/" +
+                      (update.gasLimit || update.gas) +
+                      " @ " +
+                      parseFloat(update.gasPrice) / 1000000000 +
+                      " gwei",
+                  );
+                }
+              });
+              console.log("awaiting metamask/web3 confirm result...", result);
+              console.log(await result);
+            }}
+          >
+            Add Contract!
+          </Button>
+
         </Box>
       </Modal>
     </>

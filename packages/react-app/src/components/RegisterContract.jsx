@@ -3,7 +3,7 @@ import { useState } from "react";
 import FormModalContract from "./FormModalContract";
 import { Container, Button } from "@mui/material";
 
-export default function RegisterContract() {
+export default function RegisterContract(props) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -20,6 +20,7 @@ export default function RegisterContract() {
         open={open}
         handleOpen={handleOpen}
         handleClose={handleClose}
+        props={props.rowProps}
       />
     </Container>
   );

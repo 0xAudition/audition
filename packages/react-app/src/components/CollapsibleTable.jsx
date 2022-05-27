@@ -165,7 +165,7 @@ function Row(props) {
                   ))*/}
                 </TableBody>
               </Table>
-              <RegisterContract />
+              <RegisterContract rowProps={props} />
             </Box>
 
             {/* this is where the collapsible transaction history data are structured */}
