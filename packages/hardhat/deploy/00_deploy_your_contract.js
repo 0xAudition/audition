@@ -65,6 +65,8 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   // Set Ownership and references
   await ClaimsRegistry.setProjectRegistry(ProjectRegistry.address);
   await ClaimsRegistry.setGoverner(AudnGovernor.address);
+  await AudnToken.transferOwnership(AudnGovernor.address);
+  await ClaimsRegistry.transferOwnership(AudnGovernor.address);
 
   /*  await YourContract.setPurpose("Hello");
 

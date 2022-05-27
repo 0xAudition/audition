@@ -167,7 +167,7 @@ contract ClaimsRegistry is ERC721, Ownable, KeeperCompatibleInterface {
         returns (uint256 proposalId)
     {
         ClaimInfo storage claim = claimId_info_map[_claimId];
-        if (!claim.approved && claim.proposalId == 0) {
+        if (claim.claimId > 0 && claim.proposalId == 0) {
             bytes memory transferCalldata = abi.encodeWithSignature(
                 "mint(address,uint256)",
                 claim.submitter,
@@ -215,12 +215,10 @@ contract ClaimsRegistry is ERC721, Ownable, KeeperCompatibleInterface {
         // It might be unnecessary to create a proposal and vote unless its worthy.
         uint256[] memory pendingClaims = new uint256[](100);
         uint256 counter = 0;
-        for (uint256 i = 0; i <= claimIdCounter; i++) {
+        for (uint256 i = 1; i <= claimIdCounter; i++) {
             ClaimInfo memory claim = claimId_info_map[i];
-            if (
-                !claim.approved &&
-                claim.proposalId == 0 &&
-                claim.blockNumber < (block.number - 100)
+            if (claim.claimId > 0 && claim.proposalId == 0 &&
+                claim.blockNumber < (block.number - 45)
             ) {
                 // We can create a proposal for this
                 // add claim Id to list
