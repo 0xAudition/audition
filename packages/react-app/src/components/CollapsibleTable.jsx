@@ -166,6 +166,11 @@ function Row(props) {
                   ))}
                 </TableBody>
               </Table>
+              <Container className="flex h-20 gap-4 justify-end items-center ctaButtons">
+                <Button className="bg-blue-500 text-white hover:bg-blue-400 w-24">
+                  Deposit
+                </Button>
+              </Container>
               <Table size="small" aria-label="purchases">
                 <TableHead>
                   <TableRow>
@@ -207,9 +212,6 @@ function Row(props) {
                 </TableBody>
               </Table>
               <Container className="flex h-20 gap-4 justify-end items-center ctaButtons">
-                <Button className="bg-blue-500 text-white hover:bg-blue-400 w-24">
-                  Deposit
-                </Button>
                 <CreateClaims contractRef={props} />
               </Container>
             </Box>

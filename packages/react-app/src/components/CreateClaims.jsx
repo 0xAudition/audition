@@ -15,7 +15,7 @@ export default function CreateClaims(props) {
         className="bg-blue-500 text-white hover:bg-blue-400 w-24"
         onClick={handleOpen}
       >
-        Claims
+        Make Claim
       </Button>
       <FormModalClaims
         open={open}
