@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./IProjectRegistry.sol";
+import "./IClaimsRegistry.sol";
 import "./IAudnToken.sol";
 
 contract ProjectRegistry is IProjectRegistry, Ownable {
@@ -13,7 +14,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
   using SafeERC20 for IAudnToken;
 
   IAudnToken public audn;
-  IERC721 public claims;
+  IClaimsRegistry public claims;
 
   uint256 requiredAudn = 20 * 10 ** decimals();
 
@@ -50,8 +51,10 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     address submitter;
     uint256 amount;
     DepositType depositType;
+    uint256 condition;
     uint256 startBlock; // deposit start block
     uint256 releasedAmount;
+    uint256 releasedBlock;
     uint256 claimedAmount;
     uint256 releasedTo;
     bool released;
@@ -65,20 +68,20 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
   uint256 internal projectIdCounter = 0;
   uint256 feeBalance;  // keep track of fees accrued from registrations
   uint256 depositBalance; // keep track of total deposit pool
-  uint256 yieldBalance;  // keep track of unpaid yield balance
-  uint256 lastYieldBlock; // last block to mint yield
+  // uint256 yieldBalance;  //keep track of unpaid yield balance
+  // uint256 lastYieldBlock; //last block to mint yield
 
   event RegisterProject(address indexed _from, uint256 _id, string _name, string _metaData);
   event RegisterContract(address indexed _from, uint256 _projectId, uint256 _id, string _contractSourceUri, address _contractAddress);
 
   constructor(IAudnToken _audn) {
     audn = _audn;
-    lastYieldBlock = block.number;
+    // lastYieldBlock = block.number;
   }
 
   function registerProject(string memory _projectName, string memory _metaData, string memory _contractName, string memory _contractSourceUri, address _contractAddress) public{
-    // require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
-    // audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
+    require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
+    audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
     feeBalance += requiredAudn;
     uint256 projectId = projectIdCounter + 1;
     map_id_info[projectId].projectName = _projectName;
@@ -119,7 +122,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     map_id_info[_projectId].active = false;
   }
 
-  function setDeposit(uint256 _projectId, uint256 _amount, DepositType _type) public {
+  function setDeposit(uint256 _projectId, uint256 _amount, DepositType _type, uint256 _condition) public {
     require(map_id_info[_projectId].active, "project is currently not active");
     uint256 depositAmount = _amount * 10 ** decimals();
     require(audn.balanceOf(msg.sender) >= depositAmount, "insufficient AUDN balance to set bounty");
@@ -127,14 +130,14 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     depositBalance += depositAmount;
     map_id_info[_projectId].bountyStatus = true;
     map_address_id_depositIds[msg.sender][_projectId].push(map_id_deposit[_projectId].length);
-    DepositInfo memory deposit = DepositInfo(_projectId, map_id_deposit[_projectId].length, msg.sender, depositAmount, _type, block.number, 0, 0, 0, false);
+    DepositInfo memory deposit = DepositInfo(_projectId, map_id_deposit[_projectId].length, msg.sender, depositAmount, _type, _condition, block.number, 0, 0, 0, 0, false);
     map_id_deposit[_projectId].push(deposit);
   }
 
-  // function setInsuranceDeposit(uint256 _projectId, uint256 _amount, uint256 _maxPremium) public {
-  //   require(map_id_info[_projectId].active, "project is currently not active");
-  //   uint256 depositAmount = _amount * 10 ** decimals();
-  // }
+  function setInsuranceDeposit(uint256 _projectId, uint256 _amount, uint256 _maxPremium) public {
+    require(map_id_info[_projectId].active, "project is currently not active");
+    uint256 depositAmount = _amount * 10 ** decimals();
+  }
 
   function getDeposits(uint256 _projectId) public view returns(DepositInfo[] memory) {
     return map_id_deposit[_projectId];
@@ -188,7 +191,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     return projectIdCounter;
   }
 
-  function setClaims(IERC721 _claims) public{
+  function setClaimsRegistry(IClaimsRegistry _claims) public{
     claims = _claims;
   }
 
@@ -229,7 +232,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
   }
 
   function verifyDepositGivenIdAndUser(uint256 _projectId, uint256 _depositId, address _user) public view returns(bool) {
-    require(verifyProject(_projectId), "invalid project");
+    verifyProject(_projectId);
     bool flag;
     uint256 count = map_address_id_depositIds[_user][_projectId].length;
     require(count > 0, "no deposits found for user");

@@ -5,10 +5,11 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./IProjectRegistry.sol";
+import "./IClaimsRegistry.sol";
 import "./KeeperCompatibleInterface.sol";
 import "@openzeppelin/contracts/governance/IGovernor.sol";
 
-contract ClaimsRegistry is ERC721, Ownable, KeeperCompatibleInterface {
+contract ClaimsRegistry is IClaimsRegistry, ERC721, Ownable, KeeperCompatibleInterface {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     using Strings for uint256;
@@ -21,39 +22,17 @@ contract ClaimsRegistry is ERC721, Ownable, KeeperCompatibleInterface {
 
     uint256 requiredAudn = 20 * 10**18;
 
-    struct ClaimInfo {
-        uint256 projectId;
-        uint256 claimId;
-        uint256 contractId;
-        address contractAddress;
-        address submitter;
-        string metaData;
-        // ClaimType claimType;
-        uint256 claimLength;
-        uint256 claimStart;
-        uint256 depositAmount;
-        bool refClaim;
-        uint256 refClaimId;
-        uint256 blockNumber;
-        uint256 proposalId;
-        bool approved;
-    }
-
     struct ReviewInfo {
         string review;
         address reviewer;
         uint256 timeStamp;
     }
 
-    enum ClaimType {
-        DEFAULT,
-        INSURANCE,
-        BOUNTY
-    }
 
     mapping(uint256 => ClaimInfo) public claimId_info_map;
     mapping(uint256 => uint256[]) public projectId_claimId_map;
     uint256 claimIdCounter = 0;
+    uint256 feeBalance;
 
     event RegisterClaim(
         address _from,
@@ -70,14 +49,16 @@ contract ClaimsRegistry is ERC721, Ownable, KeeperCompatibleInterface {
         uint256 _projectId,
         uint256 _contractId,
         address _contractAddress,
-        string memory _metaData
+        string memory _metaData,
+        ClaimType _claimType
     ) public returns (uint256) {
         require(projectRegistry.verifyContract(_projectId, _contractId));
-        // require(
-        //     audn.balanceOf(msg.sender) >= requiredAudn,
-        //     "insufficient AUDN balance to register claim"
-        // );
-        // audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
+        require(
+            audn.balanceOf(msg.sender) >= requiredAudn,
+            "insufficient AUDN balance to register claim"
+        );
+        audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
+        feeBalance += requiredAudn;
         uint256 claimId = claimIdCounter + 1;
         claimId_info_map[claimId].projectId = _projectId;
         claimId_info_map[claimId].claimId = claimId;
@@ -86,12 +67,18 @@ contract ClaimsRegistry is ERC721, Ownable, KeeperCompatibleInterface {
         claimId_info_map[claimId].submitter = msg.sender;
         claimId_info_map[claimId].metaData = _metaData;
         claimId_info_map[claimId].blockNumber = block.number;
+        claimId_info_map[claimId].claimType = _claimType;
 
         projectId_claimId_map[_projectId].push(claimId);
         _mint(msg.sender, claimId);
         claimIdCounter++;
         emit RegisterClaim(msg.sender, _projectId, claimId, _metaData);
         return claimId;
+    }
+
+    function setPremium(uint256 _claimId) public {
+        require(claimId_info_map[_claimId].claimType == ClaimType.INSURANCE, "cannot set premium for this claim type");
+        //TODO calculate maximum premium amount from deposit info
     }
 
     function setProjectRegistry(IProjectRegistry _projectRegistry)
@@ -133,6 +120,7 @@ contract ClaimsRegistry is ERC721, Ownable, KeeperCompatibleInterface {
     function getClaimInfo(uint256 _claimId)
         public
         view
+        override
         returns (ClaimInfo memory)
     {
         return claimId_info_map[_claimId];
@@ -152,7 +140,6 @@ contract ClaimsRegistry is ERC721, Ownable, KeeperCompatibleInterface {
         returns (ClaimInfo[] memory)
     {
         uint256 count = projectId_claimId_map[_projectId].length;
-        require(count > 0, "no claims for this project");
         ClaimInfo[] memory claims = new ClaimInfo[](count);
         for (uint256 i = 0; i < count; i++) {
             uint256 claimId = projectId_claimId_map[_projectId][i];
@@ -160,6 +147,15 @@ contract ClaimsRegistry is ERC721, Ownable, KeeperCompatibleInterface {
             claims[i] = claim;
         }
         return claims;
+    }
+
+    function getClaimType(uint256 _claimId)
+        public
+        view
+        override
+        returns(ClaimType)
+    {
+        return claimId_info_map[_claimId].claimType;
     }
 
     function createProposal(uint256 _claimId)
