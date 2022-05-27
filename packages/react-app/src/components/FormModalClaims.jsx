@@ -29,13 +29,17 @@ const style = {
 };
 
 export default function FormModalClaims(props) {
-  const [selectContract, setSelectContract] = useState("");
+  const [selectContractIdx, setSelectContractIdx] = useState(0);
+  const [claimTitle, setClaimTitle] = useState('');
+  const [claimerHandle, setClaimerHandle] = useState('');
+  const [claimDetails, setClaimDetails] = useState('');
+
   const regContract = props.rowProps.registerContract;
   console.log(props);
   if (!regContract) return null;
 
   const handleSelectChange = (e) => {
-    setSelectContract(e.target.value);
+    setSelectContractIdx(e.target.value);
   };
 
   return (
@@ -53,6 +57,9 @@ export default function FormModalClaims(props) {
             label={"Claim Title"}
             type="text"
             variant="outlined"
+            onChange={e => {
+              setClaimTitle(e.target.value);
+            }}
           />
           <TextField
             id="outlined-submitter-input"
@@ -60,6 +67,9 @@ export default function FormModalClaims(props) {
             label="Claimer Name / Handle"
             type="text"
             variant="outlined"
+            onChange={e => {
+              setClaimerHandle(e.target.value);
+            }}
           />
           <TextField
             id="outlined-claimerAddress-input"
@@ -92,11 +102,12 @@ export default function FormModalClaims(props) {
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
+              value={0}
               label="Contract Reference - select"
               onChange={handleSelectChange}
             >
-              {props.rowProps.projectContracts.map((projectContract) => (
-                <MenuItem value={projectContract.contractId.toString()}>
+              {props.rowProps.projectContracts.map((projectContract, idx) => (
+                <MenuItem key={idx} value={idx /*projectContract.contractId.toString()*/}>
                   {projectContract.contractAddr.slice(0, 8) +
                     "-" +
                     projectContract.contractName}
@@ -112,16 +123,23 @@ export default function FormModalClaims(props) {
             label="Claim Details"
             type="text"
             variant="outlined"
+            onChange={e => {
+              setClaimDetails(e.target.value);
+            }}
             multiline
           />
           <Button variant="outlined"
             style={{ marginTop: 8 }}
             onClick={async () => {
               // function registerClaim( uint256 _projectId, uint256 _contractId, address _contractAddress, string memory _metaData)
-              let __contractId = 1; // TODO
-              let __contractAddress = '0xBd696eA529180b32e8c67F1888ed51Ac071cb56F';
-              let metaData = 'claim X reason Y extra Z';
-              const result = props.txtra.tx(props.txtra.writeContracts.ClaimsRegistry.registerClaim(props.rowProps.id, __contractId, __contractAddress, metaData), update => {
+              const contractId = props.rowProps.projectContracts[selectContractIdx].contractId.toString();
+              const contractAddress = props.rowProps.projectContracts[selectContractIdx].contractAddr;
+              const metaData = JSON.stringify({
+                title: claimTitle,
+                handle: claimerHandle,
+                details: claimDetails
+              });
+              const result = props.txtra.tx(props.txtra.writeContracts.ClaimsRegistry.registerClaim(props.rowProps.id, contractId, contractAddress, metaData), update => {
                 console.log("📡 Transaction Update:", update);
                 if (update && (update.status === "confirmed" || update.status === 1)) {
                   console.log(" 🍾 Transaction " + update.hash + " finished!");
