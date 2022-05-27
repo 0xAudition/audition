@@ -95,12 +95,13 @@ export default function FormModalClaims(props) {
               label="Contract Reference - select"
               onChange={handleSelectChange}
             >
-              <MenuItem value={regContract?.[0].address}>
-                {/* THIS LINKS TO THE CONTRACT REF NUMBER. THIS NEEDS REFACTORING & PROPER LINKING */}
-                {regContract?.[0].address.slice(0, 5) +
-                  "-" +
-                  regContract?.[0].name}
-              </MenuItem>
+              {props.rowProps.projectContracts.map((projectContract) => (
+                <MenuItem value={projectContract.contractId.toString()}>
+                  {projectContract.contractAddr.slice(0, 8) +
+                    "-" +
+                    projectContract.contractName}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 
