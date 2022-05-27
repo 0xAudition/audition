@@ -76,13 +76,19 @@ function ProjectRow(props) {
   row.projectClaims = projectClaims ? projectClaims : [];
   row.projectDeposits = projectDeposits ? projectDeposits : [];
   row.id = id;
+  const txtra = {
+    address: props.props.props.address,
+    tx: props.props.props.tx,
+    writeContracts: props.props.props.writeContracts
+  };
 
-  return (<Row key={id} row={row} />);
+  return (<Row key={id} row={row} txtra={txtra} />);
 }
 
 function Row(props) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
+  console.log(props);
 
   return (
     <React.Fragment>
@@ -212,7 +218,7 @@ function Row(props) {
                 </TableBody>
               </Table>
               <Container className="flex h-20 gap-4 justify-end items-center ctaButtons">
-                <CreateClaims contractRef={props} />
+                <CreateClaims rowProps={props} />
               </Container>
             </Box>
           </Collapse>

@@ -22,7 +22,8 @@ export default function CreateClaims(props) {
         handleClose={handleClose}
         createClaims={true}
         name="Submit"
-        contractInfo={props.contractRef.row.registerContract}
+        rowProps={props.rowProps.row}
+        txtra={props.rowProps.txtra}
       />
     </>
   );

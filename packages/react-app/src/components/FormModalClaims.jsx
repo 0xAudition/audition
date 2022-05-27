@@ -29,13 +29,10 @@ const style = {
 };
 
 export default function FormModalClaims(props) {
-  const [claimerAddress, setClaimerAddress] = useState("");
   const [selectContract, setSelectContract] = useState("");
-
-  const checkClaimerAddressDigitCount = (e) => {
-    e.preventDefault();
-    setClaimerAddress(e.target.value);
-  };
+  const regContract = props.rowProps.registerContract;
+  console.log(props);
+  if (!regContract) return null;
 
   const handleSelectChange = (e) => {
     setSelectContract(e.target.value);
@@ -64,28 +61,17 @@ export default function FormModalClaims(props) {
             type="text"
             variant="outlined"
           />
-          {/* THIS NEEDS TO BE CONNECTED TO THE WALLET!!!!!!!!!!!!!!!!! */}
-          {claimerAddress.length > 25 ? (
-            <TextField
-              id="outlined-claimerAddress-input"
-              className="w-3/4"
-              label="Claimer Address"
-              type="text"
-              variant="outlined"
-              value={claimerAddress}
-              onChange={checkClaimerAddressDigitCount}
-            />
-          ) : (
-            <TextField
-              color="secondary"
-              helperText="Please ensure your address is correct before submission"
-              id="outlined-claimerAddress-input"
-              className="w-3/4"
-              label="Claimer Address"
-              value={claimerAddress}
-              onChange={checkClaimerAddressDigitCount}
-            />
-          )}
+          <TextField
+            id="outlined-claimerAddress-input"
+            className="w-3/4"
+            label="Claimer Address"
+            type="text"
+            variant="standard"
+            value={props.txtra.address}
+            InputProps={{
+              readOnly: true,
+            }}
+          />
 
           {/* read only section */}
           <TextField
@@ -109,16 +95,11 @@ export default function FormModalClaims(props) {
               label="Contract Reference - select"
               onChange={handleSelectChange}
             >
-              <MenuItem value={props.contractInfo[0].address}>
+              <MenuItem value={regContract?.[0].address}>
                 {/* THIS LINKS TO THE CONTRACT REF NUMBER. THIS NEEDS REFACTORING & PROPER LINKING */}
-                {props.contractInfo[0].address.slice(0, 5) +
+                {regContract?.[0].address.slice(0, 5) +
                   "-" +
-                  props.contractInfo[0].name}
-              </MenuItem>
-              <MenuItem value={props.contractInfo[1].address}>
-                {props.contractInfo[1].address.slice(0, 5) +
-                  "-" +
-                  props.contractInfo[1].name}
+                  regContract?.[0].name}
               </MenuItem>
             </Select>
           </FormControl>
@@ -132,7 +113,34 @@ export default function FormModalClaims(props) {
             variant="outlined"
             multiline
           />
-          <Button variant="outlined">Submit Claim</Button>
+          <Button variant="outlined"
+            style={{ marginTop: 8 }}
+            onClick={async () => {
+              // function registerClaim( uint256 _projectId, uint256 _contractId, address _contractAddress, string memory _metaData)
+              let __contractId = 1; // TODO
+              let __contractAddress = '0xBd696eA529180b32e8c67F1888ed51Ac071cb56F';
+              let metaData = 'claim X reason Y extra Z';
+              const result = props.txtra.tx(props.txtra.writeContracts.ClaimsRegistry.registerClaim(props.rowProps.id, __contractId, __contractAddress, metaData), update => {
+                console.log("📡 Transaction Update:", update);
+                if (update && (update.status === "confirmed" || update.status === 1)) {
+                  console.log(" 🍾 Transaction " + update.hash + " finished!");
+                  console.log(
+                    " ⛽️ " +
+                      update.gasUsed +
+                      "/" +
+                      (update.gasLimit || update.gas) +
+                      " @ " +
+                      parseFloat(update.gasPrice) / 1000000000 +
+                      " gwei",
+                  );
+                }
+              });
+              console.log("awaiting metamask/web3 confirm result...", result);
+              console.log(await result);
+            }}
+          >
+            Make Claim!
+          </Button>
         </Box>
       </Modal>
     </>
