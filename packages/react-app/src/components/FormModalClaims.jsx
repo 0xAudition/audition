@@ -11,6 +11,8 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
+const { ethers } = require("ethers");
+
 const style = {
   position: "absolute",
   display: "flex",
@@ -28,11 +30,16 @@ const style = {
   maxWidth: "850px",
 };
 
+const T_INSURANCE = 1;
+const T_BOUNTY = 2;
+
 export default function FormModalClaims(props) {
   const [selectContractIdx, setSelectContractIdx] = useState(0);
   const [claimTitle, setClaimTitle] = useState('');
   const [claimerHandle, setClaimerHandle] = useState('');
   const [claimDetails, setClaimDetails] = useState('');
+  const [premiumAmount, setPremiumAmount] = useState('');
+  const [depositId, setDepositId] = useState(0);
 
   const regContract = props.rowProps.registerContract;
   console.log(props);
@@ -116,6 +123,26 @@ export default function FormModalClaims(props) {
             </Select>
           </FormControl>
 
+          <TextField
+            id="outlined-premiumAmount-input"
+            className="w-3/4"
+            label="Insurance Premium Amount"
+            type="text"
+            variant="outlined"
+            onChange={e => {
+              setPremiumAmount(e.target.value);
+            }}
+          />
+          <TextField
+            id="outlined-depositId-input"
+            className="w-3/4"
+            label="Deposit ID"
+            type="text"
+            variant="outlined"
+            onChange={e => {
+              setDepositId(e.target.value);
+            }}
+          />
           {/* Text to be encrypted  - SOMEONE NEEDS TO ENCRYPT THE TEXTS ON SUBMIT*/}
           <TextField
             id="outlined-claimDetails-input"
@@ -131,7 +158,33 @@ export default function FormModalClaims(props) {
           <Button variant="outlined"
             style={{ marginTop: 8 }}
             onClick={async () => {
+              const result = props.txtra.tx(props.txtra.writeContracts.AudnToken.approve(props.txtra.writeContracts.ClaimsRegistry.address, ethers.utils.parseEther(premiumAmount)), update => {
+                console.log("📡 Transaction Update:", update);
+                if (update && (update.status === "confirmed" || update.status === 1)) {
+                  console.log(" 🍾 Transaction " + update.hash + " finished!");
+                  console.log(
+                    " ⛽️ " +
+                      update.gasUsed +
+                      "/" +
+                      (update.gasLimit || update.gas) +
+                      " @ " +
+                      parseFloat(update.gasPrice) / 1000000000 +
+                      " gwei",
+                  );
+                }
+              });
+              console.log("awaiting metamask/web3 confirm result...", result);
+              console.log(await result);
+            }}
+          >
+            Approve {premiumAmount} AUDN
+          </Button>
+
+          <Button variant="outlined"
+            style={{ marginTop: 8 }}
+            onClick={async () => {
               // function registerClaim( uint256 _projectId, uint256 _contractId, address _contractAddress, string memory _metaData)
+              // function registerClaim( uint256 _projectId, uint256 _contractId, address _contractAddress, string memory _metaData, ClaimType _claimType, uint256 _premiumAmount, uint256 _depositId) 
               const contractId = props.rowProps.projectContracts[selectContractIdx].contractId.toString();
               const contractAddress = props.rowProps.projectContracts[selectContractIdx].contractAddr;
               const metaData = JSON.stringify({
@@ -139,7 +192,7 @@ export default function FormModalClaims(props) {
                 handle: claimerHandle,
                 details: claimDetails
               });
-              const result = props.txtra.tx(props.txtra.writeContracts.ClaimsRegistry.registerClaim(props.rowProps.id, contractId, contractAddress, metaData), update => {
+              const result = props.txtra.tx(props.txtra.writeContracts.ClaimsRegistry.registerClaim(props.rowProps.id, contractId, contractAddress, metaData, premiumAmount === '' ? T_BOUNTY : T_INSURANCE, parseInt(premiumAmount), parseInt(depositId)), update => {
                 console.log("📡 Transaction Update:", update);
                 if (update && (update.status === "confirmed" || update.status === 1)) {
                   console.log(" 🍾 Transaction " + update.hash + " finished!");
