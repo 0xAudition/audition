@@ -140,8 +140,8 @@ function Row(props) {
                         bool active;
                       }
                     */
-                   row.projectContracts.map((contractRow) => (
-                    <TableRow key={contractRow.address}>
+                   row.projectContracts.length ? row.projectContracts.map((contractRow) => (
+                    <TableRow key={'contraddr-' + contractRow.address}>
                       <TableCell component="th" scope="row">
                         {contractRow.contractId.toString()}
                       </TableCell>
@@ -151,7 +151,7 @@ function Row(props) {
                       <TableCell>{contractRow.contractName}</TableCell>
                       <TableCell><a href={contractRow.contractSourceUri}>Link</a></TableCell>
                     </TableRow>
-                  ))}
+                  )) : ''}
 
                   {/*row.registerContract.map((contractRow) => (
                     <TableRow key={contractRow.address}>
@@ -210,7 +210,7 @@ function Row(props) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.projectClaims.map((claim) => (
+                  {row.projectClaims.length ? row.projectClaims.map((claim) => (
                     <TableRow key={claim.claimId}>
                       <TableCell component="th" scope="row">
                         Claim[{claim.claimId.toString()}]<br/>
@@ -220,10 +220,10 @@ function Row(props) {
                         {claim.metaData}
                       </TableCell>
                       <TableCell align="left">
-                        {claim.depositAmount.toString()} AUDN
+                        {claim.premiumBalance.toString()} AUDN
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )) : ''}
                   {row.history.map((historyRow) => (
                     <TableRow key={historyRow.claim}>
                       <TableCell component="th" scope="row">
