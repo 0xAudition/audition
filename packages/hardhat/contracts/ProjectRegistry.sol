@@ -80,9 +80,9 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
   }
 
   function registerProject(string memory _projectName, string memory _metaData, string memory _contractName, string memory _contractSourceUri, address _contractAddress) public{
-    require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
-    audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
-    feeBalance += requiredAudn;
+    // require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register project");
+    // audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
+    // feeBalance += requiredAudn;
     uint256 projectId = projectIdCounter + 1;
     map_id_info[projectId].projectName = _projectName;
     map_id_info[projectId].submitter = msg.sender;
@@ -103,9 +103,9 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
 
   function registerContract(uint256 _projectId, string memory _contractName, string memory _contractSourceUri, address _contractAddress) public{
     require(map_id_info[_projectId].active, "invalid project id");
-    require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register contract");
-    audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
-    feeBalance += requiredAudn;
+    // require(audn.balanceOf(msg.sender) >= requiredAudn, "insufficient AUDN balance to register contract");
+    // audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
+    // feeBalance += requiredAudn;
     uint256 contractId = map_id_info[_projectId].contractCount + 1;
     map_id_info[_projectId].contracts[contractId].projectId = _projectId;
     map_id_info[_projectId].contracts[contractId].contractId = contractId;
@@ -276,16 +276,16 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
   function collectClaim(uint256 _projectId, uint256 _depositId, uint256 _claimId) public {
     address claimOwner = claims.ownerOf(_claimId);
     require(claimOwner == msg.sender, "you do not own the claim");
+    IClaimsRegistry.ClaimType claimType = claims.getClaimType(_claimId);
+    if(claimType == IClaimsRegistry.ClaimType.INSURANCE) {
+
+    }
     require(map_id_deposit[_projectId][_depositId].released, "claim is not released");
     require(map_id_deposit[_projectId][_depositId].releasedTo == _claimId, "invalid claimer");
     require(map_id_deposit[_projectId][_depositId].claimedAmount == 0, "deposit was already claimed");
     audn.safeTransfer(msg.sender, map_id_deposit[_projectId][_depositId].releasedAmount);
     depositBalance -= map_id_deposit[_projectId][_depositId].releasedAmount;
     map_id_deposit[_projectId][_depositId].claimedAmount = map_id_deposit[_projectId][_depositId].releasedAmount;
-  }
-
-  function collectInsuranceClaim(uint256 _projectId, uint256 _depositId, uint256 _claimId) public {
-    
   }
 
 

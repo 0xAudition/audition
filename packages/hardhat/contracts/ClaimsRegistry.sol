@@ -55,7 +55,7 @@ contract ClaimsRegistry is IClaimsRegistry, ERC721, Ownable, KeeperCompatibleInt
         uint256 _premiumAmount,
         uint256 _depositId
     ) public returns (uint256) {
-        // require(projectRegistry.verifyContract(_projectId, _contractId));
+        require(projectRegistry.verifyContract(_projectId, _contractId));
         // require(
         //     audn.balanceOf(msg.sender) >= requiredAudn,
         //     "insufficient AUDN balance to register claim"
