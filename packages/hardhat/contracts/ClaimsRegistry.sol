@@ -125,6 +125,10 @@ contract ClaimsRegistry is IClaimsRegistry, ERC721, Ownable, KeeperCompatibleInt
         requiredAudn = _value;
     }
 
+    function getPremiumBalance(uint256 _claimId) public view override returns(uint256){
+      return claimId_info_map[_claimId].premiumBalance;
+    }
+
     function getClaimInfo(uint256 _claimId)
         public
         view
