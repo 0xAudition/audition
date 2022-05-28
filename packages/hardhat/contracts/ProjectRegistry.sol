@@ -283,14 +283,16 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
       uint256 allowedClaimAmount;
       uint256 premiumBalance = claims.getPremiumBalance(_claimId);
       uint256 remainingDepositBalance = map_id_deposit[_projectId][_depositId].releasedAmount - map_id_deposit[_projectId][_depositId].claimedAmount;
-      allowedClaimAmount = premiumBalance.mul(map_id_deposit[_projectId][_depositId].releasedAmount);
+      allowedClaimAmount = premiumBalance.mul(map_id_deposit[_projectId][_depositId].condition);
       require(remainingDepositBalance > 0, "insufficient balance in deposit to claim insurance");
       if(remainingDepositBalance > allowedClaimAmount) {
         audn.safeTransfer(msg.sender, allowedClaimAmount);
         map_id_deposit[_projectId][_depositId].claimedAmount += allowedClaimAmount;
+        depositBalance -= allowedClaimAmount;
       } else {
         audn.safeTransfer(msg.sender, remainingDepositBalance);
         map_id_deposit[_projectId][_depositId].claimedAmount += remainingDepositBalance;
+        depositBalance -= remainingDepositBalance;
       }
 
     } else {
