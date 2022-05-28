@@ -33,6 +33,7 @@ contract ClaimsRegistry is IClaimsRegistry, ERC721, Ownable, KeeperCompatibleInt
     mapping(uint256 => uint256[]) public projectId_claimId_map;
     uint256 claimIdCounter = 0;
     uint256 feeBalance;
+    uint256 premiumBalance;
 
     event RegisterClaim(
         address _from,
@@ -50,7 +51,9 @@ contract ClaimsRegistry is IClaimsRegistry, ERC721, Ownable, KeeperCompatibleInt
         uint256 _contractId,
         address _contractAddress,
         string memory _metaData,
-        ClaimType _claimType
+        ClaimType _claimType,
+        uint256 _premiumAmount,
+        uint256 _depositId
     ) public returns (uint256) {
         require(projectRegistry.verifyContract(_projectId, _contractId));
         require(
@@ -60,6 +63,16 @@ contract ClaimsRegistry is IClaimsRegistry, ERC721, Ownable, KeeperCompatibleInt
         audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
         feeBalance += requiredAudn;
         uint256 claimId = claimIdCounter + 1;
+        if(_claimType == ClaimType.INSURANCE) {
+          require(projectRegistry.verifyInsuranceDeposit(_projectId, _depositId), "referenced depositID is not an insurance deposit");
+          require(_premiumAmount > 0, "premium amount is 0");
+          uint256 premiumAmount = _premiumAmount * 10**18;
+          require(projectRegistry.verifyPremiumAmount(_projectId, _depositId, premiumAmount), "premium amount exceeds allowed premium for this claim");
+          audn.safeTransferFrom(msg.sender, address(this), premiumAmount);
+          claimId_info_map[claimId].premiumBalance = premiumAmount;
+          premiumBalance += premiumAmount;
+        }
+
         claimId_info_map[claimId].projectId = _projectId;
         claimId_info_map[claimId].claimId = claimId;
         claimId_info_map[claimId].contractId = _contractId;
@@ -68,7 +81,6 @@ contract ClaimsRegistry is IClaimsRegistry, ERC721, Ownable, KeeperCompatibleInt
         claimId_info_map[claimId].metaData = _metaData;
         claimId_info_map[claimId].blockNumber = block.number;
         claimId_info_map[claimId].claimType = _claimType;
-
         projectId_claimId_map[_projectId].push(claimId);
         _mint(msg.sender, claimId);
         claimIdCounter++;
@@ -76,10 +88,6 @@ contract ClaimsRegistry is IClaimsRegistry, ERC721, Ownable, KeeperCompatibleInt
         return claimId;
     }
 
-    function setPremium(uint256 _claimId) public {
-        require(claimId_info_map[_claimId].claimType == ClaimType.INSURANCE, "cannot set premium for this claim type");
-        //TODO calculate maximum premium amount from deposit info
-    }
 
     function setProjectRegistry(IProjectRegistry _projectRegistry)
         public

@@ -298,4 +298,24 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     return total;
   }
 
+
+  function verifyInsuranceDeposit(uint256 _projectId, uint256 _depositId) public view override returns (bool) {
+    if(map_id_deposit[_projectId][_depositId].depositType == DepositType.INSURANCE) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function verifyPremiumAmount(uint256 _projectId, uint256 _depositId, uint256 _premium) public view override returns (bool) {
+    uint256 multiplier = map_id_deposit[_projectId][_depositId].condition;
+    uint256 depositAmount = map_id_deposit[_projectId][_depositId].amount;
+
+    if(_premium.mul(multiplier) <= depositAmount) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 }

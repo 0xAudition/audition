@@ -12,9 +12,8 @@ interface IClaimsRegistry is IERC721 {
       address submitter;
       string metaData;
       ClaimType claimType;
-      // uint256 claimLength;
       uint256 claimStart;
-      uint256 depositAmount;
+      uint256 premiumBalance;
       bool refClaim;
       uint256 refClaimId;
       uint256 blockNumber;
