@@ -35,6 +35,7 @@ export default function FormModalDeposit(props) {
   const [depositAmount, setDepositAmount] = useState(0);
   // enum DepositType {DEFAULT, INSURANCE, BOUNTY}
   const [depositType, setDepositType] = useState(0);
+  const [condition, setCondition] = useState(0);
 
   const regContract = props.rowProps.registerContract;
   console.log(props);
@@ -78,6 +79,18 @@ export default function FormModalDeposit(props) {
               setDepositType(e.target.value);
             }}
           />
+          <TextField
+            id="outlined-submitter-input"
+            className="w-3/4"
+            label="Condition on Using Deposit"
+            type="text"
+            variant="outlined"
+            placeholder="integer payout multiplier for insurance, severity from 0 to 2 for bounties"
+            onChange={e => {
+              // TODO validate 0, 1, or 2
+              setCondition(e.target.value);
+            }}
+          />
           {/* read only section */}
           <TextField
             id="projectID-read-only-input"
@@ -119,7 +132,7 @@ export default function FormModalDeposit(props) {
               // function setDeposit(uint256 _projectId, uint256 _amount, DepositType _type)
               //const contractId = props.rowProps.projectContracts[selectContractIdx].contractId.toString();
               const amount = depositAmount; // XXX should be ethers.utils.parseEther(depositAmount)
-              const result = props.txtra.tx(props.txtra.writeContracts.ProjectRegistry.setDeposit(props.rowProps.id, parseFloat(depositAmount), parseInt(depositType)), update => {
+              const result = props.txtra.tx(props.txtra.writeContracts.ProjectRegistry.setDeposit(props.rowProps.id, parseFloat(depositAmount), parseInt(depositType), parseInt(condition)), update => {
                 console.log("📡 Transaction Update:", update);
                 if (update && (update.status === "confirmed" || update.status === 1)) {
                   console.log(" 🍾 Transaction " + update.hash + " finished!");
@@ -138,7 +151,7 @@ export default function FormModalDeposit(props) {
               console.log(await result);
             }}
           >
-            Make Claim!
+            Make Deposit!
           </Button>
         </Box>
       </Modal>

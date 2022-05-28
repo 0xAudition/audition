@@ -179,6 +179,8 @@ function Row(props) {
                   <TableRow>
                     <TableCell>Deposit ID</TableCell>
                     <TableCell>Amount</TableCell>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Condition</TableCell>
                     <TableCell>Claimed</TableCell>
                   </TableRow>
                 </TableHead>
@@ -190,6 +192,12 @@ function Row(props) {
                       </TableCell>
                       <TableCell>
                         {ethers.utils.formatEther(deposit.amount)}
+                      </TableCell>
+                      <TableCell>
+                        {deposit.depositType.toString()}
+                      </TableCell>
+                      <TableCell>
+                        {deposit.condition.toString()}
                       </TableCell>
                       <TableCell align="left">
                         {ethers.utils.formatEther(deposit.claimedAmount)}
