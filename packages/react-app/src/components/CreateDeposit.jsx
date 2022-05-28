@@ -12,7 +12,7 @@ export default function CreateDeposit(props) {
   return (
     <>
       <Button
-        className="bg-blue-500 text-white hover:bg-blue-400 w-24"
+        className="bg-blue-500 text-white hover:bg-blue-400 w-52"
         onClick={handleOpen}
       >
         Deposit
