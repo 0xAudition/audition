@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { AppBar, Toolbar, Typography, Button, Container } from "@mui/material";
 import img from "./../img/chainlink.svg";
+import logo from "./../img/0xShield.png";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import FormModalRegister from "../components/FormModalRegister";
@@ -23,6 +24,7 @@ export default function Home({
     <>
       <AppBar className="shadow-none gradient-bg py-4 z-10">
         <Toolbar>
+          <img src={logo}  width={50} height={50} />
           <Typography
             variant="h4"
             noWrap
@@ -31,13 +33,14 @@ export default function Home({
             sx={{
               mr: 2,
               display: "flex",
-              letterSpacing: "0.3rem",
+              letterSpacing: "0",
               textDecoration: "none",
-              fontSize: { xs: "1.2rem", md: "2rem" },
-              color: "#fff",
+              fontSize: { xs: "1.2rem", md: "3.5rem" },
+              fontWeight: "bold",
+              color: "#eee",
             }}
           >
-            Audition
+          { '{ 0xAudition }' }
           </Typography>
         </Toolbar>
       </AppBar>

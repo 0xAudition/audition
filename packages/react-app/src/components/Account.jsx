@@ -89,7 +89,7 @@ export default function Account({
       {display}
       {web3Modal && (
         <Button
-          style={{ marginLeft: 8, position: "fixed", right: "24px" }}
+          style={{ marginLeft: 8, position: "fixed", right: "24px", fontSize: "1rem" }}
           shape="round"
           onClick={accountButtonInfo.action}
           className="z-20 mt-3"

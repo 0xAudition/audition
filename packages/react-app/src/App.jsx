@@ -472,7 +472,7 @@ function App(props) {
           <Col span={24}>
             {
               /*  if the local provider has a signer, let's show the faucet:  */
-              faucetAvailable ? (
+              location.pathname !== '/' && location.pathname !== '/projects' && faucetAvailable ? (
                 <Faucet localProvider={localProvider} price={price} ensProvider={mainnetProvider} />
               ) : (
                 ""
