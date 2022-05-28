@@ -1,4 +1,4 @@
-#0xAudition
+# 0xAudition
 #### The ultimate contract review platform/marketplace
 
 Check out the action: [Rinkeby](https://0xaudition.github.io/rinkeby/#/) [Polygon](https://0xaudition.github.io/polygon/#/)
@@ -11,6 +11,6 @@ Check out the action: [Rinkeby](https://0xaudition.github.io/rinkeby/#/) [Polygo
 - Stake and earn APY as the AUDN token appreciates.
 - Participate in Governance, make policies and stay in control.
 
-###Developers
+### Developers
 - Earn bounties by reviewing contracts.
 - Earn AUDN token by participating in vetting the right claims.
