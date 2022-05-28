@@ -55,13 +55,13 @@ contract ClaimsRegistry is IClaimsRegistry, ERC721, Ownable, KeeperCompatibleInt
         uint256 _premiumAmount,
         uint256 _depositId
     ) public returns (uint256) {
-        require(projectRegistry.verifyContract(_projectId, _contractId));
-        require(
-            audn.balanceOf(msg.sender) >= requiredAudn,
-            "insufficient AUDN balance to register claim"
-        );
-        audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
-        feeBalance += requiredAudn;
+        // require(projectRegistry.verifyContract(_projectId, _contractId));
+        // require(
+        //     audn.balanceOf(msg.sender) >= requiredAudn,
+        //     "insufficient AUDN balance to register claim"
+        // );
+        // audn.safeTransferFrom(msg.sender, address(this), requiredAudn);
+        // feeBalance += requiredAudn;
         uint256 claimId = claimIdCounter + 1;
         if(_claimType == ClaimType.INSURANCE) {
           require(projectRegistry.verifyInsuranceDeposit(_projectId, _depositId), "referenced depositID is not an insurance deposit");

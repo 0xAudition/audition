@@ -37,7 +37,7 @@ const addClaims = async ({ AudnToken, ProjectRegistry, ClaimsRegistry, AudnGover
             BriefDesciption: 'It seems to have a reentrancy error in one of the linked older contracts',
             Detail: 'The main contract references a DecimalHelper contract while paying out. This is linked to a older contract at 0x123... where a reentrancy attack can be mounted with the right situation',
             Impact: 'Funds maintained in the pool can be siphoned off 4% at a time if the user has staked'
-        }));
+        }), 2, 0, 0);
 
     await ClaimsRegistry.registerClaim(1, 1, '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
         JSON.stringify({
@@ -45,7 +45,7 @@ const addClaims = async ({ AudnToken, ProjectRegistry, ClaimsRegistry, AudnGover
             BriefDesciption: 'It is missing the onlyOwner modifier for CalculatePayoffs() method',
             Detail: 'Its only called on certain situation and seems non-critical. But if the oracle fails, it might end up being the failover method',
             Impact: 'Attacker can get control of DAO'
-        }));
+        }), 2, 0, 0);
 }
 
 main()

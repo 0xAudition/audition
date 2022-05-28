@@ -284,6 +284,11 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     map_id_deposit[_projectId][_depositId].claimedAmount = map_id_deposit[_projectId][_depositId].releasedAmount;
   }
 
+  function collectInsuranceClaim(uint256 _projectId, uint256 _depositId, uint256 _claimId) public {
+    
+  }
+
+
   function getDepositBalance() public view returns (uint256) {
     return depositBalance;
   }
