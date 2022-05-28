@@ -207,19 +207,19 @@ describe("Audition ProjectRegistry", function () {
       // let startBlock = deposit[0].startBlock;
       // console.log("startBlock :", startBlock.toString());
 
-      console.log("block before forward: ", await ethers.provider.getBlockNumber());
-      for (let index = 0; index < 40000; index++) {
-        await ethers.provider.send('evm_mine');
-      }
-
-      console.log("block after forward", await ethers.provider.getBlockNumber());
-
-      let currentYield = await ProjectRegistry.calculateYieldGivenDeposit(1, 0, addr1.address);
-      console.log('current yield', currentYield.toString());
-
-      expect(currentYield).to.equal(oneDayYield);
-
-      console.log("yieldGivenDeposit: ", currentYield.toString());
+      // console.log("block before forward: ", await ethers.provider.getBlockNumber());
+      // for (let index = 0; index < 40000; index++) {
+      //   await ethers.provider.send('evm_mine');
+      // }
+      //
+      // console.log("block after forward", await ethers.provider.getBlockNumber());
+      //
+      // let currentYield = await ProjectRegistry.calculateYieldGivenDeposit(1, 0, addr1.address);
+      // console.log('current yield', currentYield.toString());
+      //
+      // expect(currentYield).to.equal(oneDayYield);
+      //
+      // console.log("yieldGivenDeposit: ", currentYield.toString());
 
     });
 
@@ -250,6 +250,10 @@ describe("Audition ProjectRegistry", function () {
       console.log("user balance after collecting claim : ", ethers.utils.formatUnits(balanceAfterClaim.toString()));
       console.log("contract deposit balance after collecting claim : ", ethers.utils.formatUnits(contractBalance.toString()));
       console.log("contract real balance after collecting claim : ", ethers.utils.formatUnits(contractRealBalance.toString()));
+
+      //collecting insurance claim.
+
+
     });
 
     it("Should deactivate project and contracts (onlyOwner)", async function () {
