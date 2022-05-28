@@ -31,4 +31,6 @@ interface IClaimsRegistry is IERC721 {
 
   function getClaimType(uint256 _claimId) external view returns (ClaimType claimType);
 
+  function getPremiumBalance(uint256 _claimId) external view returns (uint256);
+
 }
