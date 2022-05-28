@@ -279,7 +279,7 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     require(map_id_deposit[_projectId][_depositId].released, "claim is not released");
     require(map_id_deposit[_projectId][_depositId].releasedTo == _claimId, "invalid claimer");
     IClaimsRegistry.ClaimType claimType = claims.getClaimType(_claimId);
-    if(claimType == IClaimsRegistry.ClaimType.INSURANCE) {
+    if(claimType == IClaimsRegistry.ClaimType.INSURANCE && map_id_deposit[_projectId][_depositId].depositType == DepositType.INSURANCE) {
       uint256 allowedClaimAmount;
       uint256 premiumBalance = claims.getPremiumBalance(_claimId);
       uint256 remainingDepositBalance = map_id_deposit[_projectId][_depositId].releasedAmount - map_id_deposit[_projectId][_depositId].claimedAmount;
@@ -294,7 +294,6 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
         map_id_deposit[_projectId][_depositId].claimedAmount += remainingDepositBalance;
         depositBalance -= remainingDepositBalance;
       }
-
     } else {
       require(map_id_deposit[_projectId][_depositId].claimedAmount == 0, "deposit was already claimed");
       audn.safeTransfer(msg.sender, map_id_deposit[_projectId][_depositId].releasedAmount);
