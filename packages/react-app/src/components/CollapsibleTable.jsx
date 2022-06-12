@@ -228,7 +228,7 @@ function Row(props) {
                         {claim.metaData}
                       </TableCell>
                       <TableCell align="left">
-                        {claim.premiumBalance.toString()} AUDN
+                        {ethers.utils.formatEther(claim.premiumBalance)} AUDN
                       </TableCell>
                     </TableRow>
                   )) : ''}
