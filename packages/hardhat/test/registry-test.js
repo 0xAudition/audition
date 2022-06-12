@@ -4,6 +4,10 @@ const { solidity } = require("ethereum-waffle");
 
 use(solidity);
 
+function bigNumber(num) {
+  return ethers.BigNumber.from(num);
+}
+
 describe("Audition ProjectRegistry", function () {
   const initialSupply = '100000000000000000000000'; //100k AUDN
   const approveAmount = '20000000000000000000'; //20 AUDN
@@ -169,6 +173,7 @@ describe("Audition ProjectRegistry", function () {
       expect(claim.contractAddress).to.equal('0xBd696eA529180b32e8c67F1888ed51Ac071cb56F');
       expect(claim.metaData).to.equal('some meta data possibly Json');
       expect(claim.premiumBalance).to.equal(ethers.BigNumber.from('200').mul(decimals));
+      expect(claim.claimType).to.equal(1);
 
       await Token.approve(ClaimsRegistry.address, approveAmount, {from: owner.address});
 
@@ -227,11 +232,13 @@ describe("Audition ProjectRegistry", function () {
       await ProjectRegistry.setClaimsRegistry(ClaimsRegistry.address);
       await Token.setRegistry(ProjectRegistry.address);
 
-      await ProjectRegistry.connect(addr2).releaseDeposit(1, 1, 1);
+      await ProjectRegistry.connect(addr1).releaseDeposit(1, 0, 1);
 
-      deposit = await ProjectRegistry.getDepositGivenIdAndUser(1, 1, addr2.address);
+      deposit = await ProjectRegistry.getDepositGivenIdAndUser(1, 0, addr1.address);
 
       console.log("deposit released amount : ", ethers.utils.formatUnits(deposit.releasedAmount.toString()));
+
+      expect(await ClaimsRegistry.getPremiumBalance()).to.equal(bigNumber(200).mul(decimals).toString());
 
       let balanceBeforeClaim = await Token.balanceOf(owner.address);
       let contractBalance = await ProjectRegistry.getDepositBalance();
@@ -241,7 +248,7 @@ describe("Audition ProjectRegistry", function () {
       console.log("contract deposit balance before collecting claim : ", ethers.utils.formatUnits(contractBalance.toString()));
       console.log("contract real balance before collecting claim : ", ethers.utils.formatUnits(contractRealBalance.toString()));
 
-      await ProjectRegistry.collectClaim(1, 1, 1);
+      await ProjectRegistry.collectClaim(1, 0, 1);
 
       let balanceAfterClaim = await Token.balanceOf(owner.address);
       contractBalance = await ProjectRegistry.getDepositBalance();
@@ -250,6 +257,18 @@ describe("Audition ProjectRegistry", function () {
       console.log("user balance after collecting claim : ", ethers.utils.formatUnits(balanceAfterClaim.toString()));
       console.log("contract deposit balance after collecting claim : ", ethers.utils.formatUnits(contractBalance.toString()));
       console.log("contract real balance after collecting claim : ", ethers.utils.formatUnits(contractRealBalance.toString()));
+
+
+      claims = await ClaimsRegistry.getClaims(1);
+
+      console.log("claims: ", claims);
+
+      expect(claims[0].claimedAmount).to.equal(bigNumber(1000).mul(decimals));
+      expect(await ClaimsRegistry.getPremiumBalance()).to.equal(bigNumber(0).mul(decimals));
+
+      expect(await Token.balanceOf(owner.address)).to.equal(bigNumber(101000).mul(decimals));
+
+
 
       //collecting insurance claim.
 

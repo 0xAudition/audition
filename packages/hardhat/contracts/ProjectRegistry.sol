@@ -276,25 +276,31 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
   function collectClaim(uint256 _projectId, uint256 _depositId, uint256 _claimId) public {
     address claimOwner = claims.ownerOf(_claimId);
     require(claimOwner == msg.sender, "you do not own the claim");
-    require(map_id_deposit[_projectId][_depositId].released, "claim is not released");
-    require(map_id_deposit[_projectId][_depositId].releasedTo == _claimId, "invalid claimer");
+    require(map_id_deposit[_projectId][_depositId].released, "deposit is not released");
     IClaimsRegistry.ClaimType claimType = claims.getClaimType(_claimId);
-    if(claimType == IClaimsRegistry.ClaimType.INSURANCE && map_id_deposit[_projectId][_depositId].depositType == DepositType.INSURANCE) {
-      uint256 allowedClaimAmount;
-      uint256 premiumBalance = claims.getPremiumBalance(_claimId);
+    if(claimType == IClaimsRegistry.ClaimType.INSURANCE && (map_id_deposit[_projectId][_depositId].depositType == DepositType.INSURANCE)) {
+      uint256 maxAllowedClaimAmount;
+      uint256 premiumBalance = claims.getClaimPremiumBalance(_claimId);
+      require(premiumBalance > 0, "premium balance is 0");
       uint256 remainingDepositBalance = map_id_deposit[_projectId][_depositId].releasedAmount - map_id_deposit[_projectId][_depositId].claimedAmount;
-      allowedClaimAmount = premiumBalance.mul(map_id_deposit[_projectId][_depositId].condition);
-      require(remainingDepositBalance > 0, "insufficient balance in deposit to claim insurance");
-      if(remainingDepositBalance > allowedClaimAmount) {
-        audn.safeTransfer(msg.sender, allowedClaimAmount);
-        map_id_deposit[_projectId][_depositId].claimedAmount += allowedClaimAmount;
-        depositBalance -= allowedClaimAmount;
+      require(remainingDepositBalance > 0, "deposit balance is 0");
+      maxAllowedClaimAmount = premiumBalance.mul(map_id_deposit[_projectId][_depositId].condition);
+      uint256 claimAllowance = claims.getClaimAllowance(_claimId, maxAllowedClaimAmount);
+      require(claimAllowance > 0, "already claimed the max amount for this claim");
+      if(remainingDepositBalance >= claimAllowance) {
+        audn.safeTransfer(msg.sender, claimAllowance);
+        map_id_deposit[_projectId][_depositId].claimedAmount += claimAllowance;
+        depositBalance -= claimAllowance;
+        claims.setClaimedAmount(_claimId, claimAllowance);
+        claims.withdrawPremium(_claimId);
       } else {
         audn.safeTransfer(msg.sender, remainingDepositBalance);
         map_id_deposit[_projectId][_depositId].claimedAmount += remainingDepositBalance;
         depositBalance -= remainingDepositBalance;
+        claims.setClaimedAmount(_claimId, remainingDepositBalance);
       }
     } else {
+      require(map_id_deposit[_projectId][_depositId].releasedTo == _claimId, "invalid claimer");
       require(map_id_deposit[_projectId][_depositId].claimedAmount == 0, "deposit was already claimed");
       audn.safeTransfer(msg.sender, map_id_deposit[_projectId][_depositId].releasedAmount);
       depositBalance -= map_id_deposit[_projectId][_depositId].releasedAmount;
@@ -302,7 +308,6 @@ contract ProjectRegistry is IProjectRegistry, Ownable {
     }
 
   }
-
 
   function getDepositBalance() public view returns (uint256) {
     return depositBalance;

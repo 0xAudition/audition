@@ -42,6 +42,11 @@ contract ClaimsRegistry is IClaimsRegistry, ERC721, Ownable, KeeperCompatibleInt
         string _metaData
     );
 
+    modifier onlyProjectRegistry {
+      require(msg.sender == address(projectRegistry));
+      _;
+    }
+
     constructor(IERC20 _audn) ERC721(_name, _symbol) {
         audn = _audn;
     }
@@ -125,8 +130,28 @@ contract ClaimsRegistry is IClaimsRegistry, ERC721, Ownable, KeeperCompatibleInt
         requiredAudn = _value;
     }
 
-    function getPremiumBalance(uint256 _claimId) public view override returns(uint256){
+    function getPremiumBalance() public view returns(uint256){
+      return premiumBalance;
+    }
+
+    function getClaimPremiumBalance(uint256 _claimId) public view override returns(uint256){
       return claimId_info_map[_claimId].premiumBalance;
+    }
+
+    function withdrawPremium(uint256 _claimId) public override onlyProjectRegistry{
+      audn.safeTransfer(ownerOf(_claimId), claimId_info_map[_claimId].premiumBalance);
+      premiumBalance -= claimId_info_map[_claimId].premiumBalance;
+      claimId_info_map[_claimId].premiumBalance = 0;
+    }
+
+    function getClaimAllowance(uint256 _claimId, uint256 _maxClaimAmount) public override returns(uint256){
+      uint256 claimedAmount = claimId_info_map[_claimId].claimedAmount;
+      uint256 remainingAllowance = _maxClaimAmount - claimedAmount;
+      return remainingAllowance;
+    }
+
+    function setClaimedAmount(uint256 _claimId, uint256 _amount) public override onlyProjectRegistry{
+      claimId_info_map[_claimId].claimedAmount += _amount;
     }
 
     function getClaimInfo(uint256 _claimId)
